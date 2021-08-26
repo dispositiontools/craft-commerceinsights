@@ -1,0 +1,164 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% set fullPageForm = false %}
+
+{# The title of this CP section #}
+{% set title = "Commerce Insights: Products purchased" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('commerceinsights') %}
+
+{% block actionButton %}
+<form method="POST" >
+{{ redirectInput('commerceinsights/products/purchases?startDate={startDate}&endDate={endDate}') }}
+{{ actionInput('commerceinsights/cp/goto-page') }}
+{{ csrfInput() }}
+<div class="input ltr" style="display:inline-block;padding-right:10px;">
+{% include "commerceinsights/_components/date_field" with {
+    label: 'Start',
+    instructions: '',
+    id: 'startDate',
+    name: 'startDate',
+    value: startDate|date("Y-m-d")
+} %}
+</div>
+<div class="input ltr" style="display:inline-block;padding-right:10px;">
+{% include "commerceinsights/_components/date_field" with {
+    label: 'End',
+    instructions: '',
+    id: 'endDate',
+    name: 'endDate',
+    value: endDate|date("Y-m-d")
+} %}
+</div>
+<input type="submit" class="btn submit" value="Update report">
+</form>
+{% endblock %}
+
+{% set content %}
+
+<p>
+  <a href="{{ url('commerceinsights/products') }}">&lt; back to products </a>
+</p>
+<h2>
+Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-m-d") }}
+</h2>
+
+
+<p>&nbsp;</p>
+
+<form method="post" >
+    {{ redirectInput(url("commerceinsights/products/purchases") ) }}
+    {{ csrfInput() }}
+    <input type="hidden" name="action" value="commerceinsights/reports/download-csv" />
+    <input type="hidden" name="reportType" value="productsPurchasesByOrderDates" />
+
+    <input type="hidden" name="startDate" value="{{ startDate|date("Y-m-d") }}" />
+    <input type="hidden" name="endDate" value="{{ endDate|date("Y-m-d") }}" />
+
+    <input type="submit" class="btn submit" value="Download CSV">
+</form>
+
+<p>&nbsp;</p>
+
+
+
+
+<div class="elements">
+<div class="tableview tablepane">
+  <table class="data fullwidth ">
+    <thead>
+      <tr>
+      <td>Date</td>
+      <td>Type</td>
+      <td>Product</td>
+      <td>Variant</td>
+      <td>Qty</td>
+      <td>Price</td>
+      <td>Sale Price</td>
+      <td>Sale</td>
+      <td>Subtotal</td>
+      <td>Total</td>
+      {#
+      <td>Note</td>
+      <td>Options</td>
+      #}
+
+      <td>Order Id</td>
+      <td>Order Total Paid</td>
+      <td>Customer</td>
+      <td>Order Status</td>
+      <td>Site</td>
+      <td>User</td>
+      <td>Currency</td>
+
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for purchase in purchases %}
+      <tr>
+        <td style="white-space: nowrap;">{{ purchase.orderDatePaid }}</td>
+        <td>{{ purchase.productTypeName }}</td>
+        <td>{{ purchase.productTitle }}</td>
+        <td>{{ purchase.variantTitle }}</td>
+
+        <td>{{ purchase.lineItemQty }}</td>
+        <td>{{ purchase.lineItemPrice|number_format(2, '.', ',') }}</td>
+        <td>{{ purchase.lineItemSalePrice|number_format(2, '.', ',') }}</td>
+        <td><span >{{ purchase.lineItemSaleAmount|number_format(2, '.', ',') }}</span></td>
+        <td><b>{{ purchase.lineItemSubtotal|number_format(2, '.', ',') }}</b></td>
+        <td><b>{{ purchase.lineItemTotal|number_format(2, '.', ',') }}</b></td>
+
+        {#
+        <td>{{ purchase.lineItemNote }}</td>
+        <td>{{ purchase.lineItemOptions|json_encode }}</td>
+#}
+
+        <td><a href="{{ url('commerce/orders/'~purchase.orderId) }}">{{ purchase.orderId }}</a></td>
+        <td>{{ purchase.orderTotalPaid }}</td>
+        <td><a href="{{ url('commerce/customers/'~purchase.customerId) }}">{{ purchase.orderEmail }}</a></td>
+        <td><span class="commerceStatusLabel" data-orderstatus="{{ purchase.orderStatusHandle }}" title="{{ purchase.orderStatusName }}"><span class="status {{ purchase.orderStatusColor }}"></span></span></td>
+        <td>{{ purchase.siteName }}</td>
+        <td><a href="{{ url('users/'~purchase.userId) }}">{{ purchase.userFirstName }} {{ purchase.userLastName }}</a></td>
+        <td>{{ purchase.orderPaymentCurrency }}</td>
+
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+</div>
+
+{#
+<td>{{ purchase.siteHandle }}</td>
+<td>{{ purchase.orderSiteId }}</td>
+<td>{{ purchase.orderGatewayId }}</td>
+<td>{{ purchase.orderNumber }}</td>
+  <td>{{ purchase.orderCurrency }}</td>
+
+  <td>{{ purchase.lineItemStatusName }}</td>
+  <td>{{ purchase.lineItemStatusHandle }}</td>
+  <td>{{ purchase.lineItemStatusColor }}</td>
+  <td>{{ purchase.lineItemStatusDescription }}</td>
+    <td>{{ purchase.lineItemPrice }}</td>
+#}
+
+    <p class="textline"></p>
+{% endset %}

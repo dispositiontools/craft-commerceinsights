@@ -1,0 +1,53 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{# Link for the ? icon at the bottom of the page #}
+{% set docsUrl = "https://github.com/dispositiontools/productinsights/blob/master/README.md" %}
+
+{# The title of this CP section #}
+{% set title = "Commerce Insights" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('productinsights') %}
+
+
+
+
+{# The content of the CP Section#}
+{% set content %}
+
+    <table class="data fullwidth">
+    <thead>
+      <tr>
+        <th>Product type</th>
+        <th>Number of products</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for type in craft.commerce.productTypes.allProductTypes %}
+    {% set typeProducts = craft.products.type(type).all() %}
+      <tr>
+          <td>{{ type.name }}</td>
+          <th>{{ typeProducts|length }}</th>
+          <td><a href="{{ url('commerceinsights/products/'~ type.handle) }}">View </a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+{% endset %}

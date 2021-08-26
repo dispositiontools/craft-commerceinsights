@@ -1,0 +1,154 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+
+{# The title of this CP section #}
+{% set title = "Customer Insights" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('commerceinsights') %}
+
+
+
+{% set content %}
+
+    <p>
+      <a href="{{ url('commerceinsights/customers') }}">&lt; back to Customer  </a>
+    </p>
+    <h2>Customers</h2>
+{% set numberOfCustomers = customers|length %}
+
+
+{% set filteredCustomers = customers|filter(el => el.rfmScore > 8) %}
+
+{% set numberOfFilteredCustomers = filteredCustomers|length %}
+
+<p>Customers: {{ numberOfCustomers }}<br />
+Filtered: {{ numberOfFilteredCustomers}}
+</p>
+    <table class="data fullwidth " id="customers" >
+    <thead>
+      <tr>
+        <th>Customer</th>
+
+        <th>RFM Score</th>
+        <th>RFM</th>
+
+        <th>Last order</th>
+        <th>Recency</th>
+
+        <th>Number of orders</th>
+        <th>Frequency</th>
+
+        <th>Total amount</th>
+        <th>Monetary</th>
+      </tr>
+    </thead>
+    <tbody >
+      {% for customer in customers %}
+
+          <tr>
+              <td><a href="{{ customer.orderUserId }}">{{ customer.name }}</a></td>
+              <td>{{ customer.rfmScore }}</td>
+              <td>{{ customer.rfm }}</td>
+
+
+              <td>{{ customer.lastOrderDate|date("Y-m-d") }}</td>
+              <td>{{ customer.recency }}</td>
+
+              <td>{{ customer.numberOfOrders }}</td>
+              <td>{{ customer.frequency }}</td>
+
+
+              <td>{{ customer.ordersTotalPrice|number_format }}</td>
+              <td>{{ customer.monitary }}</td>
+
+        </tr>
+
+
+
+      {% endfor %}
+      </tbody>
+    </table>
+
+{% js "https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" %}
+
+
+{% js %}
+
+function tableData() {
+    return {
+        sortBy: "",
+        sortAsc: false,
+        sortByColumn($event) {
+            if (this.sortBy === $event.target.innerText) {
+                if (this.sortAsc) {
+                    this.sortBy = "";
+                    this.sortAsc = false;
+                } else {
+                    this.sortAsc = !this.sortAsc;
+                }
+            } else {
+                this.sortBy = $event.target.innerText;
+            }
+
+            let rows = this.getTableRows()
+                .sort(
+                    this.sortCallback(
+                        Array.from($event.target.parentNode.children).indexOf(
+                            $event.target
+                        )
+                    )
+                )
+                .forEach((tr) => {
+                    this.$refs.tbody.appendChild(tr);
+                });
+        },
+        getTableRows() {
+            return Array.from(this.$refs.tbody.querySelectorAll("tr"));
+        },
+        getCellValue(row, index) {
+            return row.children[index].innerText;
+        },
+        sortCallback(index) {
+            return (a, b) =>
+                ((row1, row2) => {
+                    return row1 !== "" &&
+                        row2 !== "" &&
+                        !isNaN(row1) &&
+                        !isNaN(row2)
+                        ? row1 - row2
+                        : row1.toString().localeCompare(row2);
+                })(
+                    this.getCellValue(this.sortAsc ? a : b, index),
+                    this.getCellValue(this.sortAsc ? b : a, index)
+                );
+        }
+    };
+}
+
+
+
+{% endjs %}
+
+
+
+
+
+    <p class="textline"></p>
+{% endset %}

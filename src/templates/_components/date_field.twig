@@ -1,0 +1,24 @@
+{% set id = (id ?? 'date'~random())~'-date' -%}
+{% set name = name ?? null -%}
+{% set value = (value ?? false) ? date(value, false) : null -%}
+
+<div class="datewrapper"
+        {%- if block('attr') is defined %} {{ block('attr') }}{% endif %}>
+    {%- include "_includes/forms/text" with {
+        name: (name ? name~'[date]'),
+        autocomplete: false,
+        size: 10,
+        placeholder: ' ',
+        value: (value ? value|date('Y-m-d') : '')
+    } -%}
+    <div data-icon="date"></div>
+    {% if name -%}
+        <input type="hidden" name="{{ name }}[timezone]" value="{{ craft.app.getTimeZone() }}">
+    {%- endif -%}
+</div>
+
+{%- js %}
+    $('#{{ id|namespaceInputId|e('js') }}').datepicker($.extend({
+        defaultDate: new Date({% if value %}{{ value.format('Y') }}, {{ value.format('n')-1 }}, {{ value.format('j') }}{% endif %})
+    }, {"constrainInput":false,"dateFormat":"yy-mm-dd","dayNames":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"dayNamesMin":["S","M","T","W","T","F","S"],"dayNamesShort":["Su","Mo","Tu","We","Th","Fr","Sa"],"firstDay":0,"monthNames":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthNamesShort":["J","F","M","A","M","J","J","A","S","O","N","D"],"nextText":"Next","prevText":"Prev"}));
+{%- endjs %}

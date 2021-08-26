@@ -1,0 +1,126 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+
+{# The title of this CP section #}
+{% set title = "Product Insights" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('commerceinsights') %}
+
+{% set product = craft.products.id(productId).one() %}
+
+{% set content %}
+
+<p>
+  <a href="{{ url('commerceinsights/products') }}">&lt; back to product types </a>
+</p>
+
+    <h2>Product: {{ product.title }}</h2>
+    <p>
+      <a href="{{ product.url }}">View product</a> |
+      <a href="{{ product.cpEditUrl }}">Edit product</a>
+    </p>
+    <p>&nbsp;</p>
+
+    <form method="post" >
+        {{ redirectInput(url("commerceinsights/products/"~product.id) ) }}
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="commerceinsights/reports/download-csv" />
+        <input type="hidden" name="reportType" value="product" />
+        <input type="hidden" name="productId" value="{{ product.id }}" />
+        <input type="submit" class="btn submit" value="Download CSV">
+    </form>
+
+    <p>&nbsp;</p>
+
+<div class="elements">
+<div class="tableview tablepane">
+  <table class="data fullwidth ">
+    <thead>
+      <tr>
+          <td colspan="6"><b>Line item</b></td>
+          <td colspan="7"><b>Order</b></td>
+
+      </tr>
+      <tr>
+
+      <td>Qty</td>
+      <td>Sale Price</td>
+      <td>Sale</td>
+      <td>Subtotal</td>
+      <td>Total</td>
+      <td>Note</td>
+      <td>Options</td>
+
+          <td>Date</td>
+          <td>Order Id</td>
+          <td>Customer</td>
+          <td>Order Status</td>
+          <td>Site</td>
+          <td>User</td>
+
+          <td>Currency</td>
+
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for purchase in purchases %}
+      <tr>
+
+        <td>{{ purchase.lineItemQty }}</td>
+        <td>{{ purchase.lineItemSalePrice|number_format(2, '.', ',') }}</td>
+        <td><span >{{ purchase.lineItemSaleAmount|number_format(2, '.', ',') }}</span></td>
+        <td><b>{{ purchase.lineItemSubtotal|number_format(2, '.', ',') }}</b></td>
+        <td><b>{{ purchase.lineItemTotal|number_format(2, '.', ',') }}</b></td>
+        <td>{{ purchase.lineItemNote }}</td>
+        <td>{# {{ purchase.lineItemOptions }} #}</td>
+
+        <td style="white-space: nowrap;">{{ purchase.orderDatePaid }}</td>
+        <td><a href="{{ url('commerce/orders/'~purchase.orderId) }}">{{ purchase.orderId }}</a></td>
+        <td><a href="{{ url('commerce/customers/'~purchase.customerId) }}">{{ purchase.orderEmail }}</a></td>
+        <td><span class="commerceStatusLabel" data-orderstatus="{{ purchase.orderStatusHandle }}" title="{{ purchase.orderStatusName }}"><span class="status {{ purchase.orderStatusColor }}"></span></span></td>
+        <td>{{ purchase.siteName }}</td>
+        <td><a href="{{ url('users/'~purchase.userId) }}">{{ purchase.userFirstName }} {{ purchase.userLastName }}</a></td>
+        <td>{{ purchase.orderPaymentCurrency }}</td>
+
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+</div>
+
+{#
+<td>{{ purchase.siteHandle }}</td>
+<td>{{ purchase.orderSiteId }}</td>
+<td>{{ purchase.orderGatewayId }}</td>
+<td>{{ purchase.orderNumber }}</td>
+  <td>{{ purchase.orderCurrency }}</td>
+
+  <td>{{ purchase.lineItemStatusName }}</td>
+  <td>{{ purchase.lineItemStatusHandle }}</td>
+  <td>{{ purchase.lineItemStatusColor }}</td>
+  <td>{{ purchase.lineItemStatusDescription }}</td>
+    <td>{{ purchase.lineItemPrice }}</td>
+#}
+
+    <p class="textline"></p>
+{% endset %}

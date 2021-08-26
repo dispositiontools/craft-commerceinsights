@@ -1,0 +1,78 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+
+{# The title of this CP section #}
+{% set title = "Customer Insights" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('commerceinsights') %}
+
+
+
+{% set content %}
+
+    <p>
+      <a href="{{ url('commerceinsights') }}">&lt; back to dashboard  </a>
+    </p>
+    <h2>Customers</h2>
+
+    <a href="{{ url('commerceinsights/customers/summary') }}">View Customers summary</a>
+
+    <p>&nbsp;</p>
+    
+    <a href="{{ url('commerceinsights/customers/rfm') }}">Customer RFM</a>
+
+    <p>Filter by</p>
+    <label>Recency</label>
+    <select name="recency">
+      <option value="*">*</option>
+      <option value="5">5</option>
+      <option value="4">4</option>
+      <option value="3">3</option>
+      <option value="2">2</option>
+      <option value="1">1</option>
+    </select>
+
+    <label>frequency</label>
+    <select name="frequency">
+      <option value="*">*</option>
+      <option value="5">5</option>
+      <option value="4">4</option>
+      <option value="3">3</option>
+      <option value="2">2</option>
+      <option value="1">1</option>
+    </select>
+
+    <label>monetary</label>
+    <select name="monetary">
+      <option value="*">*</option>
+      <option value="5">5</option>
+      <option value="4">4</option>
+      <option value="3">3</option>
+      <option value="2">2</option>
+      <option value="1">1</option>
+    </select>
+
+    <input type="submit" name="" value="Filter">
+
+
+
+
+    <p class="textline"></p>
+{% endset %}

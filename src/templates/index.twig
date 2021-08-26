@@ -1,0 +1,80 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle("dispositiontools\\commerceinsights\\assetbundles\\commerceinsights\\CommerceinsightsAsset") %}
+{% import "_includes/forms" as forms %}
+
+{# Link for the ? icon at the bottom of the page #}
+{% set docsUrl = "https://github.com/dispositiontools/productinsights/blob/master/README.md" %}
+
+{# The title of this CP section #}
+{% set title = "Commerce Insights" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('productinsights') %}
+
+
+
+
+{# The content of the CP Section#}
+{% set content %}
+
+<h2>Explore and export data from Craft Commerce</h2>
+
+
+<div class="ci-flex">
+
+<div class="ci-item">
+  <div class="ci-inner">
+    <h3>Who bought which products and when</h3>
+
+    <p>
+    <a href="{{ url('commerceinsights/products/purchases') }}" class="ci-button">View purchases by date</a>
+<br />&nbsp;<br />
+    <a href="{{ url('commerceinsights/products') }}" class="ci-button">View purchases by products</a>
+    </p>
+  </div>
+</div>
+
+
+
+<div class="ci-item">
+  <div class="ci-inner">
+    <h3>Customer summaries</h3>
+    <p>
+    This page may take a while to load if you have a lot of customers
+    </p>
+
+
+    <p><a href="{{ url('commerceinsights/customers') }}" class="ci-button">View customer summaries</a></p>
+  </div>
+</div>
+<div class="ci-item">
+  <div class="ci-inner">
+      <h3>Transactions</h3>
+
+      <p>Explore </p>
+      <p>
+      <a href="{{ url('commerceinsights/transactions') }}" class="ci-button">View transactions</a>
+      </p>
+  </div>
+</div>
+
+
+</div>
+
+
+{% endset %}

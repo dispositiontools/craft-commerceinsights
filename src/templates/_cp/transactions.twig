@@ -1,0 +1,154 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Productinsights plugin for Craft CMS 3.x
+ *
+ * Productinsights index.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Productinsights
+ * @since     1.0.0
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{# Link for the ? icon at the bottom of the page #}
+{% set docsUrl = "https://github.com/dispositiontools/productinsights/blob/master/README.md" %}
+
+{# The title of this CP section #}
+{% set title = "Commerce Insights" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('productinsights') %}
+
+
+{% block actionButton %}
+<form method="POST" >
+  {{ redirectInput('commerceinsights/transactions?startDate={startDate}&endDate={endDate}') }}
+  {{ actionInput('commerceinsights/cp/goto-page') }}
+  {{ csrfInput() }}
+  <div class="input ltr" style="display:inline-block;padding-right:10px;">
+  {% include "commerceinsights/_components/date_field" with {
+      label: 'Start',
+      instructions: '',
+      id: 'startDate',
+      name: 'startDate',
+      value: startDate|date("Y-m-d")
+  } %}
+  </div>
+  <div class="input ltr" style="display:inline-block;padding-right:10px;">
+  {% include "commerceinsights/_components/date_field" with {
+      label: 'End',
+      instructions: '',
+      id: 'endDate',
+      name: 'endDate',
+      value: endDate|date("Y-m-d")
+  } %}
+  </div>
+  <input type="submit" class="btn submit" value="Update report">
+</form>
+{% endblock %}
+
+{# The content of the CP Section#}
+{% set content %}
+
+<p>
+  <a href="{{ url('commerceinsights') }}">&lt; back to Dashboard  </a>
+</p>
+
+<h2>Explore transactions</h2>
+
+
+<p>&nbsp;</p>
+
+<form method="post" >
+    {{ redirectInput(url("commerceinsights/transactions") ) }}
+    {{ csrfInput() }}
+    <input type="hidden" name="action" value="commerceinsights/reports/download-csv" />
+    <input type="hidden" name="reportType" value="transactions" />
+
+    <input type="hidden" name="startDate" value="{{ startDate|date("Y-m-d") }}" />
+    <input type="hidden" name="endDate" value="{{ endDate|date("Y-m-d") }}" />
+
+    <input type="submit" class="btn submit" value="Download CSV">
+</form>
+
+<p>&nbsp;</p>
+
+
+<h3>Transaction summary for {{ startDate|date("Y-m-d") }} - {{ endDate|date("Y-m-d") }}</h3>
+<table>
+<tr>
+  <td></td>
+  <td><b>Amounts</b></td>
+  <td><b>Transactions</b></td>
+  <td><b>Average</b></td>
+</tr>
+
+<tr>
+  <td><b>Paid</b></td>
+  <td style="text-align:right;">{{ stats.totalPaid }}</td>
+  <td style="text-align:right;">{{ stats.numberOfPaidTransactions }}</td>
+  <td style="text-align:right;">{{ stats.averagePaid|number_format(2) }}</td>
+</tr>
+
+<tr>
+  <td><b>Refunded</b></td>
+  <td style="text-align:right;">{{ stats.totalRefunded }}</td>
+  <td style="text-align:right;">{{ stats.numberOfRefunds }}</td>
+  <td style="text-align:right;">{{ stats.averageRefunded|number_format(2) }}</td>
+</tr>
+
+<tr>
+  <td><b>Total</b></td>
+  <td style="text-align:right;">{{ stats.total }}</td>
+  <td style="text-align:right;">{{ stats.numberOfTransactions }}</td>
+  <td></td>
+</tr>
+</table>
+
+
+<p>
+First transaction: <b>{{ stats.firstTransactionDate }}</b><br />
+Last transaction: <b>{{ stats.lastTransactionDate }}</b>
+
+</p>
+
+
+<h2>Transactions</h2>
+    <table class="data fullwidth">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Gateway</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Type</th>
+        <th>Order</th>
+        <th>Email</th>
+        <th>User</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for transaction in transactions %}
+  <tr>
+    <td>{{ transaction.transactionId }}</td>
+    <td>{{ transaction.gatewayName }}</td>
+    <td style="text-align:right;">{{ transaction.transactionAmount|currency(transaction.paymentCurrency) }}</td>
+    <td>{{ transaction.transactionStatus }}</td>
+    <td>{{ transaction.transactionType }}</td>
+    <td><a href="{{ url('commerce/orders/'~transaction.orderId) }}">{{ transaction.orderReference }}</a></td>
+    <td>{{ transaction.email }}</td>
+    <td>{% if transaction.userId %}<a href="{{ url('users/'~transaction.userId) }}"> {{ transaction.userFirstName }} {{ transaction.userLastName }}</a>{% endif %}</td>
+  </tr>
+  {% endfor %}
+
+
+
+    </tbody>
+    </table>
+{% endset %}
