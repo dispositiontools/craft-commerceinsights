@@ -12,7 +12,7 @@
  * @since     1.0.0
  */
 #}
-
+{% requirePermission 'commerceinsightsProducts' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 {% set fullPageForm = false %}
@@ -61,7 +61,7 @@ Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-
 
 
 <p>&nbsp;</p>
-
+{% if currentUser.can('commerceinsightsProductsDownload') %}
 <form method="post" >
     {{ redirectInput(url("commerceinsights/products/purchases") ) }}
     {{ csrfInput() }}
@@ -73,7 +73,7 @@ Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-
 
     <input type="submit" class="btn submit" value="Download CSV">
 </form>
-
+{% endif %}
 <p>&nbsp;</p>
 
 

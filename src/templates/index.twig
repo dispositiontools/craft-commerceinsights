@@ -37,6 +37,7 @@
 
 <div class="ci-flex">
 
+{% if currentUser.can('commerceinsightsProducts') %}
 <div class="ci-item">
   <div class="ci-inner">
     <h3>Who bought which products and when</h3>
@@ -48,9 +49,10 @@
     </p>
   </div>
 </div>
+{% endif %}
 
 
-
+{% if currentUser.can('commerceinsightsCustomers') %}
 <div class="ci-item">
   <div class="ci-inner">
     <h3>Customer summaries</h3>
@@ -62,6 +64,9 @@
     <p><a href="{{ url('commerceinsights/customers') }}" class="ci-button">View customer summaries</a></p>
   </div>
 </div>
+{% endif %}
+
+{% if currentUser.can('commerceinsightsTransaction') %}
 <div class="ci-item">
   <div class="ci-inner">
       <h3>Transactions</h3>
@@ -72,7 +77,7 @@
       </p>
   </div>
 </div>
-
+{% endif %}
 
 </div>
 

@@ -12,7 +12,7 @@
  * @since     1.0.0
  */
 #}
-
+{% requirePermission 'commerceinsightsCustomers' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -32,7 +32,7 @@
     </p>
     <h2>Customer summaries</h2>
 
-
+{% if currentUser.can('commerceinsightsCustomersDownload') %}
     <form method="post" >
         {{ redirectInput(url("commerceinsights/customers/summary") ) }}
         {{ csrfInput() }}
@@ -40,7 +40,7 @@
         <input type="hidden" name="reportType" value="customer-summary" />
         <input type="submit" class="btn submit" value="Download CSV">
     </form>
-
+{% endif %}
     <p>&nbsp;</p>
 
     <div class="elements">

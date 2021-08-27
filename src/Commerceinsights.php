@@ -37,6 +37,9 @@ use craft\events\RegisterCpNavItemsEvent;
 
 use yii\base\Event;
 
+use craft\events\RegisterUserPermissionsEvent;
+use craft\services\UserPermissions;
+
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
  * it as simple as we can, but the training wheels are off. A little prior knowledge is
@@ -175,6 +178,56 @@ class Commerceinsights extends Plugin
             }
         );
 
+
+
+        // adding Custom permissions
+
+         Event::on(
+             UserPermissions::class,
+             UserPermissions::EVENT_REGISTER_PERMISSIONS,
+             function(RegisterUserPermissionsEvent $event) {
+
+
+               $commerceInsightPermissions = array();
+
+               $commerceInsightPermissions[ 'commerceinsightsTransaction'] = array(
+                      'label' => 'View transactions'
+                  );
+                $commerceInsightPermissions[ 'commerceinsightsTransactionDownload'] = array(
+                       'label' => 'Download transactions'
+                   );
+
+
+
+               $commerceInsightPermissions[ 'commerceinsightsCustomers'] = array(
+                      'label' => 'View customer summaries'
+                  );
+                $commerceInsightPermissions[ 'commerceinsightsCustomersDownload'] = array(
+                       'label' => 'Download customer summaries'
+                   );
+
+
+
+               $commerceInsightPermissions[ 'commerceinsightsProducts'] = array(
+                      'label' => 'View product sales'
+                  );
+                $commerceInsightPermissions[ 'commerceinsightsProductsDownload'] = array(
+                       'label' => 'Download product sales'
+                   );
+
+
+
+                 // return those permissions
+                 $event->permissions[ 'CommerceInsights']  = [
+                   'commerceinsightsAccessModule' => [
+                       'label' => 'Access Commerce Insights',
+                       'nested' => $commerceInsightPermissions
+                    ]
+                 ];
+
+         });
+
+
           $this->initRoutes();
 
 /**
@@ -213,23 +266,28 @@ class Commerceinsights extends Plugin
 
         $parent['label'] = 'Commerce Insights';
 
+        if (Craft::$app->user->checkPermission('commerceinsightsProducts')){
+            $parent['subnav']['products'] = [
+                'label' =>  'Products',
+                'url' => 'commerceinsights/products'
+            ];
+        }
 
+        if (Craft::$app->user->checkPermission('commerceinsightsCustomers')){
+            $parent['subnav']['customers'] = [
+                'label' =>  'Customers',
+                'url' => 'commerceinsights/customers'
+            ];
+        }
 
-        $parent['subnav']['products'] = [
-            'label' =>  'Products',
-            'url' => 'commerceinsights/products'
-        ];
-        $parent['subnav']['customers'] = [
-            'label' =>  'Customers',
-            'url' => 'commerceinsights/customers'
-        ];
-        $parent['subnav']['transactions'] = [
-            'label' =>  'Transactions',
-            'url' => 'commerceinsights/transactions'
-        ];
+        if (Craft::$app->user->checkPermission('commerceinsightsTransaction')) {
+            $parent['subnav']['transactions'] = [
+                'label' =>  'Transactions',
+                'url' => 'commerceinsights/transactions'
+            ];
+        }
 
-
-
+        
 
         return $parent;
     }

@@ -12,7 +12,7 @@
  * @since     1.0.0
  */
 #}
-
+{% requirePermission 'commerceinsightsProducts' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -37,7 +37,7 @@
       <a href="{{ product.cpEditUrl }}">Edit product</a>
     </p>
     <p>&nbsp;</p>
-
+{% if currentUser.can('commerceinsightsProductsDownload') %}
     <form method="post" >
         {{ redirectInput(url("commerceinsights/products/"~product.id) ) }}
         {{ csrfInput() }}
@@ -46,7 +46,7 @@
         <input type="hidden" name="productId" value="{{ product.id }}" />
         <input type="submit" class="btn submit" value="Download CSV">
     </form>
-
+{% endif %}
     <p>&nbsp;</p>
 
 <div class="elements">
