@@ -1,14 +1,14 @@
 {# @var craft \craft\web\twig\variables\CraftVariable #}
 {#
 /**
- * Productinsights plugin for Craft CMS 3.x
+ * Commerceinsights plugin for Craft CMS 3.x
  *
- * Productinsights index.twig
+ * Commerceinsights index.twig
  *
  * @author    Disposition Tools
  * @copyright Copyright (c) 2021 Disposition Tools
  * @link      http://www.disposition.tools/
- * @package   Productinsights
+ * @package   Commerceinsights
  * @since     1.0.0
  */
 #}
@@ -35,6 +35,12 @@
 <h2>Explore and export data from Craft Commerce</h2>
 
 
+{% set plugin = craft.app.plugins.getPlugin('commerce', false) %}
+
+
+{% if plugin and plugin is not null and plugin.isInstalled %}
+
+
 <div class="ci-flex">
 
 {% if currentUser.can('commerceinsightsProducts') %}
@@ -56,12 +62,13 @@
 <div class="ci-item">
   <div class="ci-inner">
     <h3>Customer summaries</h3>
-    <p>
-    This page may take a while to load if you have a lot of customers
-    </p>
+
 
 
     <p><a href="{{ url('commerceinsights/customers') }}" class="ci-button">View customer summaries</a></p>
+    <p>
+    This page may take a while to load if you have a lot of customers
+    </p>
   </div>
 </div>
 {% endif %}
@@ -71,7 +78,6 @@
   <div class="ci-inner">
       <h3>Transactions</h3>
 
-      <p>Explore </p>
       <p>
       <a href="{{ url('commerceinsights/transactions') }}" class="ci-button">View transactions</a>
       </p>
@@ -80,6 +86,10 @@
 {% endif %}
 
 </div>
+
+{% else %}
+<p>This plugin required Craft Commerce to be installed.</p>
+{% endif %}
 
 
 {% endset %}

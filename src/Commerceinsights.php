@@ -266,28 +266,38 @@ class Commerceinsights extends Plugin
 
         $parent['label'] = 'Commerce Insights';
 
-        if (Craft::$app->user->checkPermission('commerceinsightsProducts')){
-            $parent['subnav']['products'] = [
-                'label' =>  'Products',
-                'url' => 'commerceinsights/products'
-            ];
+
+
+        $craftCommercePlugin = Craft::$app->plugins->getPlugin('commerce', false);
+
+        if ($craftCommercePlugin && $craftCommercePlugin != null && $craftCommercePlugin->isInstalled)
+        {
+            if (Craft::$app->user->checkPermission('commerceinsightsProducts')){
+                $parent['subnav']['products'] = [
+                    'label' =>  'Products',
+                    'url' => 'commerceinsights/products'
+                ];
+            }
+
+            if (Craft::$app->user->checkPermission('commerceinsightsCustomers')){
+                $parent['subnav']['customers'] = [
+                    'label' =>  'Customers',
+                    'url' => 'commerceinsights/customers'
+                ];
+            }
+
+            if (Craft::$app->user->checkPermission('commerceinsightsTransaction')) {
+                $parent['subnav']['transactions'] = [
+                    'label' =>  'Transactions',
+                    'url' => 'commerceinsights/transactions'
+                ];
+            }
         }
 
-        if (Craft::$app->user->checkPermission('commerceinsightsCustomers')){
-            $parent['subnav']['customers'] = [
-                'label' =>  'Customers',
-                'url' => 'commerceinsights/customers'
-            ];
-        }
 
-        if (Craft::$app->user->checkPermission('commerceinsightsTransaction')) {
-            $parent['subnav']['transactions'] = [
-                'label' =>  'Transactions',
-                'url' => 'commerceinsights/transactions'
-            ];
-        }
 
-        
+
+
 
         return $parent;
     }
