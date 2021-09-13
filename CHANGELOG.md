@@ -1,5 +1,7 @@
 # Release Notes for Commerce Insights
 
+## 1.0.5 - 2021-09-13
+
 ## 1.0.4 - 2021-09-13
  - New tag to push tags 1.0.2 and 1.0.3 to the plugin store which were added between submitting to the store and being approved.
 
