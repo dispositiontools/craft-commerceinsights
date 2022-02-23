@@ -148,19 +148,31 @@ class Customers extends Component
 
             //return $ordersTotalPriceArray;
 
+            $ordersTotalPriceAvg = 0;
+            if( count($ordersTotalPriceArray) > 0 )
+            {
+              $ordersTotalPriceAvg = array_sum($ordersTotalPriceArray)/count($ordersTotalPriceArray);
+            }
+
+            $numberOfOrdersAvg = 0;
+            if( count($numberOfOrdersArray) > 0 )
+            {
+              $numberOfOrdersAvg = array_sum($numberOfOrdersArray)/count($numberOfOrdersArray);
+            }
+
 
         return [
           'customers' => $customers,
           'totals' => [
             'ordersTotalPrice' => [
               'sum' => array_sum($ordersTotalPriceArray),
-              'avg' => array_sum($ordersTotalPriceArray)/count($ordersTotalPriceArray),
+              'avg' => $ordersTotalPriceAvg,
               'max' => max($ordersTotalPriceArray),
               'min' => min($ordersTotalPriceArray),
             ],
             'numberOfOrders' => [
               'sum' => array_sum($numberOfOrdersArray),
-              'avg' => array_sum($numberOfOrdersArray)/count($numberOfOrdersArray),
+              'avg' => $numberOfOrdersAvg,
               'max' => max($numberOfOrdersArray),
               'min' => min($numberOfOrdersArray),
             ],

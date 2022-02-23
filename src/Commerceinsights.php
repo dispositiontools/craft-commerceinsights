@@ -52,7 +52,7 @@ use craft\services\UserPermissions;
  *
  * @author    Disposition Tools
  * @package   Commerceinsights
- * @since     1.0.0
+ * @since     1.0.6
  *
  * @property  TransactionsService $transactions
  * @property  OrdersService $orders
@@ -82,7 +82,7 @@ class Commerceinsights extends Plugin
      *
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public $schemaVersion = '1.0.6';
 
     /**
      * Set to `true` if the plugin should have a settings view in the control panel.

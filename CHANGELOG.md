@@ -1,5 +1,8 @@
 # Release Notes for Commerce Insights
 
+## 1.0.6 - 2022-02-23
+- corrected a division by zero issue when viewing customers on a new install. Fixing issue [#1](https://github.com/dispositiontools/craft-commerceinsights/issues/1).
+
 ## 1.0.5 - 2021-09-13
 
 ## 1.0.4 - 2021-09-13
