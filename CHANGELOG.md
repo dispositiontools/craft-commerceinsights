@@ -1,5 +1,10 @@
 # Release Notes for Commerce Insights
 
+## 1.0.7 - 2022-03-06
+
+### Updated
+- Corrected an only_full_group_by error on MySQL 8+. Fixing issue [#2](https://github.com/dispositiontools/craft-commerceinsights/issues/2) with thanks to [WHITE](https://github.com/WHITE-developer) 
+
 ## 1.0.6 - 2022-02-23
 - corrected a division by zero issue when viewing customers on a new install. Fixing issue [#1](https://github.com/dispositiontools/craft-commerceinsights/issues/1).
 

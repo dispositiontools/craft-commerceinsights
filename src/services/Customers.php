@@ -123,7 +123,7 @@ class Customers extends Component
             ->leftJoin(['u' => CraftTable::USERS],'u.id = cc.userId')
 
             ->where('co.isCompleted = 1')
-            ->groupBy(['co.customerId'])
+            ->groupBy(['co.customerId', 'co.email'])
             ->orderBy([
               'ordersTotalPrice' => SORT_DESC,
             ]);
