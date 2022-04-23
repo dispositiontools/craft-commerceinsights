@@ -161,6 +161,40 @@ class Customers extends Component
             }
 
 
+
+
+        if( count($customers) == 0)
+        {
+          return [
+            'customers' => [],
+            'totals' => [
+              'ordersTotalPrice' => [
+                'sum' => 0,
+                'avg' => 0,
+                'max' => 0,
+                'min' => 0,
+              ],
+              'numberOfOrders' => [
+                'sum' => 0,
+                'avg' => 0,
+                'max' => 0,
+                'min' => 0,
+              ],
+              'lastOrderDate' => [
+                'max' => 0,
+                'min' => 0,
+              ],
+              'customerLength' => [
+                'max' => 0,
+                'min' => 0,
+              ]
+            ]
+            //'totals' => $purchasesTotals
+
+          ];
+        }
+
+
         return [
           'customers' => $customers,
           'totals' => [
