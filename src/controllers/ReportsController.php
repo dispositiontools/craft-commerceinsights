@@ -129,6 +129,22 @@ class ReportsController extends Controller
               $filenameReportType       = "Transactions";
               break;
 
+          case "productsBestSelling":
+
+                $reportDetails  = Commerceinsights::$plugin->products->getBestSellingProducts($startDate,$endDate);
+                $csvData        = $this->makeCsv( $reportDetails['products'] );
+                $filenameReportType       = "BestSellingProducts";
+
+              break;
+
+
+          case "productsBestSellingVariants":
+
+                $reportDetails  = Commerceinsights::$plugin->products->getBestSellingProducts($startDate,$endDate);
+                $csvData        = $this->makeCsv( $reportDetails['variants'] );
+                $filenameReportType       = "BestSellingVariants";
+
+              break;
 
 
 

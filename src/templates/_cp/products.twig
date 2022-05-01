@@ -61,7 +61,43 @@
   <input type="submit" class="btn submit" value="View purchases">
 </form>
 
+
+
+
 <hr/>
+
+
+
+<h2>Find best selling products</h2>
+<form method="POST" >
+  {{ redirectInput('commerceinsights/products/best-selling?startDate={startDate}&endDate={endDate}') }}
+  {{ actionInput('commerceinsights/cp/goto-page') }}
+  {{ csrfInput() }}
+  <div class="input ltr" style="display:inline-block;padding-right:10px;">
+  {% include "commerceinsights/_components/date_field" with {
+      label: 'Start',
+      instructions: '',
+      id: 'startDate',
+      name: 'startDate',
+      value: startDate|date("Y-m-d")
+  } %}
+  </div>
+  <div class="input ltr" style="display:inline-block;padding-right:10px;">
+  {% include "commerceinsights/_components/date_field" with {
+      label: 'End',
+      instructions: '',
+      id: 'endDate',
+      name: 'endDate',
+      value: endDate|date("Y-m-d")
+  } %}
+  </div>
+  <input type="submit" class="btn submit" value="View best selling products">
+</form>
+
+<hr/>
+
+
+
 
 <h2>Find who ordered a specific product and when</h2>
     <table class="data fullwidth">

@@ -8,6 +8,10 @@ return [
   'commerceinsights/customers/rfm'     => 'commerceinsights/cp/customers-rfm',
 
   'commerceinsights/products'     => 'commerceinsights/cp/products',
+  'commerceinsights/products/best-selling'     => 'commerceinsights/cp/products-best-selling',
+
+
+
 
   'commerceinsights/transactions'     => 'commerceinsights/cp/transactions',
 

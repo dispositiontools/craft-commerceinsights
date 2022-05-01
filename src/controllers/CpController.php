@@ -330,6 +330,46 @@ class CpController extends Controller
 
 
 
+    /**
+     * Handle a request going to our plugin's actionProductsBestSelling URL,
+     * e.g.: actions/commerceinsights/cp/products-best-selling
+     *
+     * @return mixed
+     */
+    public function actionProductsBestSelling()
+    {
+
+        $startDate = Craft::$app->request->getQueryParam('startDate', false);
+        $endDate = Craft::$app->request->getQueryParam('endDate',false);
+        $siteId = Craft::$app->request->getQueryParam('siteId',false);
+
+        if(! $startDate)
+        {
+          $startDate = date("Y-m-")."01";
+        }
+
+        if(! $endDate)
+        {
+          $endDate = date("Y-m-d");
+        }
+        $startDateObject = DateTimeHelper::toDateTime($startDate);
+        $endDateObject = DateTimeHelper::toDateTime($endDate);
+
+        $productsDetails = Commerceinsights::$plugin->products->getBestSellingProducts($startDate,$endDate);
+
+        return $this->renderTemplate(
+          'commerceinsights/_cp/products_best_selling',
+          [
+              'startDate'      => $startDateObject,
+              'endDate'        => $endDateObject,
+              'products'      => $productsDetails['products'],
+              'variants'      => $productsDetails['variants'],
+              'totals'         => $productsDetails['totals']
+          ]
+        );
+    }
+
+
 
 
 }

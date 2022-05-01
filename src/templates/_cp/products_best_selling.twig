@@ -1,0 +1,179 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Commerceinsights plugin for Craft CMS 3.x
+ *
+ * Commerceinsights products_purchases_order_date.twig
+ *
+ * @author    Disposition Tools
+ * @copyright Copyright (c) 2021 Disposition Tools
+ * @link      http://www.disposition.tools/
+ * @package   Commerceinsights
+ * @since     1.0.0
+ */
+#}
+{% requirePermission 'commerceinsightsProducts' %}
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% set fullPageForm = false %}
+
+{# The title of this CP section #}
+{% set title = "Commerce Insights: Best selling products" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('commerceinsights') %}
+
+{% block actionButton %}
+<form method="POST" >
+{{ redirectInput('commerceinsights/products/best-selling?startDate={startDate}&endDate={endDate}') }}
+{{ actionInput('commerceinsights/cp/goto-page') }}
+{{ csrfInput() }}
+<div class="input ltr" style="display:inline-block;padding-right:10px;">
+{% include "commerceinsights/_components/date_field" with {
+    label: 'Start',
+    instructions: '',
+    id: 'startDate',
+    name: 'startDate',
+    value: startDate|date("Y-m-d")
+} %}
+</div>
+<div class="input ltr" style="display:inline-block;padding-right:10px;">
+{% include "commerceinsights/_components/date_field" with {
+    label: 'End',
+    instructions: '',
+    id: 'endDate',
+    name: 'endDate',
+    value: endDate|date("Y-m-d")
+} %}
+</div>
+<input type="submit" class="btn submit" value="Update report">
+</form>
+{% endblock %}
+
+{% set content %}
+
+<p>
+  <a href="{{ url('commerceinsights/products') }}">&lt; back to products </a>
+</p>
+<h2>
+Best selling products between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-m-d") }}
+</h2>
+
+
+<p>&nbsp;</p>
+{% if currentUser.can('commerceinsightsProductsDownload') %}
+<div style="display:flex">
+<form method="post" style="margin-right:20px;" >
+    {{ redirectInput(url("commerceinsights/products/best-selling") ) }}
+    {{ csrfInput() }}
+    <input type="hidden" name="action" value="commerceinsights/reports/download-csv" />
+    <input type="hidden" name="reportType" value="productsBestSelling" />
+
+    <input type="hidden" name="startDate" value="{{ startDate|date("Y-m-d") }}" />
+    <input type="hidden" name="endDate" value="{{ endDate|date("Y-m-d") }}" />
+
+    <input type="submit" class="btn submit" value="Download best selling products CSV">
+</form>
+
+
+<form method="post" >
+    {{ redirectInput(url("commerceinsights/products/best-selling") ) }}
+    {{ csrfInput() }}
+    <input type="hidden" name="action" value="commerceinsights/reports/download-csv" />
+    <input type="hidden" name="reportType" value="productsBestSellingVariants" />
+
+    <input type="hidden" name="startDate" value="{{ startDate|date("Y-m-d") }}" />
+    <input type="hidden" name="endDate" value="{{ endDate|date("Y-m-d") }}" />
+
+    <input type="submit" class="btn submit" value="Download best selling variants CSV">
+</form>
+</div>
+{% endif %}
+<p>&nbsp;</p>
+
+
+
+<h3>Products</h3>
+<p>&nbsp;</p>
+<div class="tableview tablepane">
+  <table class="data fullwidth ">
+    <thead>
+      <tr>
+      <th>Type</th>
+      <th>Product</th>
+      <th>Qty</th>
+      <th>Subtotal</th>
+      <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for product in products %}
+      <tr>
+        <td>{{ product.productTypeName }}</td>
+        <td>{{ product.productTitle }}</td>
+        <td style="text-align:right;">{{ product.qty }}</td>
+        <td style="text-align:right;">{{ product.subtotal|number_format(2, '.', ',') }}</td>
+        <td style="text-align:right;">{{ product.total|number_format(2, '.', ',') }}</td>
+
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+
+<p>&nbsp;</p>
+<hr>
+<p>&nbsp;</p>
+
+<h3>Variants</h3>
+<p>&nbsp;</p>
+<div class="tableview tablepane">
+  <table class="data fullwidth ">
+    <thead>
+      <tr>
+      <th>Type</th>
+      <th>Product</th>
+       <th>Variant</th>
+      <th>Qty</th>
+      <th>Subtotal</th>
+      <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% for variant in variants %}
+      <tr>
+        <td>{{ variant.productTypeName }}</td>
+        <td>{{ variant.productTitle }}</td>
+        <td>{{ variant.variantTitle }}</td>
+
+        <td style="text-align:right;">{{ variant.qty }}</td>
+        <td style="text-align:right;">{{ variant.subtotal|number_format(2, '.', ',') }}</td>
+        <td style="text-align:right;">{{ variant.total|number_format(2, '.', ',') }}</td>
+
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+
+
+{#
+<td>{{ purchase.siteHandle }}</td>
+<td>{{ purchase.orderSiteId }}</td>
+<td>{{ purchase.orderGatewayId }}</td>
+<td>{{ purchase.orderNumber }}</td>
+  <td>{{ purchase.orderCurrency }}</td>
+
+  <td>{{ purchase.lineItemStatusName }}</td>
+  <td>{{ purchase.lineItemStatusHandle }}</td>
+  <td>{{ purchase.lineItemStatusColor }}</td>
+  <td>{{ purchase.lineItemStatusDescription }}</td>
+    <td>{{ purchase.lineItemPrice }}</td>
+#}
+
+    <p class="textline"></p>
+{% endset %}
