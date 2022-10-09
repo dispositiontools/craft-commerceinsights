@@ -1,6 +1,12 @@
 # Release Notes for Commerce Insights
 
 
+## 1.0.10 - 2022-10-09
+
+### Updated
+- Corrected an issue with incorrectly calculated best selling product.
+- Corrected an issue an error on the best selling products page when a product had been deleted. Fixing issue [#3](https://github.com/dispositiontools/craft-commerceinsights/issues/3) with thanks to maxpdesign and totov.
+
 ## 1.0.9 - 2022-05-01
 
 ### Added

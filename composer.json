@@ -2,7 +2,7 @@
     "name": "dispositiontools/craft-commerceinsights",
     "description": "Get the low down on how your Craft Commerce store is doing. Explore and export customer summaries, product purchases, and transactions.",
     "type": "craft-plugin",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "keywords": [
         "craft",
         "cms",

@@ -111,154 +111,176 @@ class Products extends Component
  *
  * @return mixed
  */
-public function getBestSellingProducts($startDate=false,$endDate=false)
-{
+ public function getBestSellingProducts($startDate=false,$endDate=false)
+ {
 
-    $orderQuery = OrderElement::find()->isCompleted(true);
-    if($startDate && $endDate)
-    {
-        $orderQuery->dateOrdered(['and', ">= {$startDate}", "< {$endDate}"]);
-    }
-    elseif($startDate){
-          $orderQuery->dateOrdered(">= {$startDate}");
-    }elseif($endDate)
-    {
-      $orderQuery->dateOrdered("< {$endDate}");
-    }
+     $orderQuery = OrderElement::find()->isCompleted(true);
+     if($startDate && $endDate)
+     {
+         $orderQuery->dateOrdered(['and', ">= {$startDate}", "< {$endDate}"]);
+     }
+     elseif($startDate){
+           $orderQuery->dateOrdered(">= {$startDate}");
+     }elseif($endDate)
+     {
+       $orderQuery->dateOrdered("< {$endDate}");
+     }
 
-    //$orderQuery->limit(10);
+     //$orderQuery->limit(10);
 
-    $orders = $orderQuery->all();
-
-
-    $products = [];
-
-    $variants = [];
-    $ordersCount = count($orders);
-    $customers = [];
-    $qtyTotal = 0;
-    $totalTotal = 0;
-    $subtotalTotal = 0;
-
-    foreach($orders AS $order)
-    {
-        $customer = $order->getCustomer();
-
-        if(!array_key_exists($customer->id, $customers))
-        {
-          $customers[$customer->id] = 1;
-        }
-        else
-        {
-          // code...
-          $customers[$customer->id] = $customers[$customer->id] + 1;
-        }
-        $lineItems = $order->getLineItems();
-
-        foreach($lineItems as $lineItem)
-        {
-            $variant = $lineItem->getPurchasable();
-            $product = $variant->getProduct();
-
-            $qtyTotal   = $qtyTotal + $lineItem->qty;
-            $totalTotal = $totalTotal + $lineItem->total;
-            $subtotalTotal = $subtotalTotal + $lineItem->subtotal;
-
-            if(!array_key_exists($product->id, $products))
-            {
-
-                $productData = [
-
-                  'productId'     => $product->id,
-                  'productTypeName' => $product->type->name,
-                  'productTitle'  => $product->title,
-                  'qty'  => $lineItem->qty,
-                  'subtotal'  => $lineItem->subtotal,
-                  'total'  => $lineItem->total,
+     $orders = $orderQuery->all();
 
 
-                ];
+     $products = [];
 
-                $products[$product->id] = $productData;
-            }
-            else
-            {
-               $products[$product->id]['subtotal'] = $products[$product->id]['subtotal'] + $lineItem->subtotal;
-               $products[$product->id]['total'] = $products[$product->id]['total'] + $lineItem->total;
-               $products[$product->id]['qty'] = $products[$product->id]['qty'] + $lineItem->qty;
+     $variants = [];
+     $ordersCount = count($orders);
+     $customers = [];
+     $qtyTotal = 0;
+     $totalTotal = 0;
+     $subtotalTotal = 0;
+     $productTypes = [];
 
-            }
+     foreach($orders AS $order)
+     {
+         $customerId = $order->customerId;
 
-            if(!array_key_exists($variant->id, $variants))
-            {
+         if(!array_key_exists($customerId , $customers))
+         {
+           $customers[ $customerId ] = 1;
+         }
+         else
+         {
+           // code...
+           $customers[ $customerId ] = $customers[ $customerId ] + 1;
+         }
+         $lineItems = $order->getLineItems();
 
-                $variantData = [
-                  'productId'     => $product->id,
-                  'productTypeName' => $product->type->name,
-                  'productTitle'  => $product->title,
-                  'variantId'     => $variant->id,
-                  'variantTitle'  => $variant->title,
-                  'qty'  => $lineItem->qty,
-                  'subtotal'  => $lineItem->subtotal,
-                  'total'  => $lineItem->total,
-
-
-                ];
-
-                $variants[$variant->id] = $variantData;
-            }
-            else
-            {
-               $variants[$variant->id]['subtotal'] = $products[$product->id]['subtotal'] + $lineItem->subtotal;
-               $variants[$variant->id]['total'] = $products[$product->id]['total'] + $lineItem->total;
-               $variants[$variant->id]['qty'] = $products[$product->id]['qty'] + $lineItem->qty;
-
-            }
+         foreach($lineItems as $lineItem)
+         {
+             //$variant = $lineItem->getPurchasable();
+             //$product = $variant->getProduct();
+             $snapshotArray =  $lineItem->snapshot;
 
 
-            unset($variant);
-            unset($product);
-            unset($productData);
-            unset($variantData);
-        } // end foreach lineitem
+             if(!array_key_exists($snapshotArray['product']['typeId'], $productTypes))
+             {
+                 $productType = Commerce::getInstance()->ProductTypes->getProductTypeById($snapshotArray['product']['typeId']);
+                 if($productType)
+                 {
+                     $productTypes[ $snapshotArray['product']['typeId'] ] = $productType->name;
+                     unset( $productType );
+                 }
+                 else
+                 {
+                     $productTypes[ $snapshotArray['product']['typeId'] ] = $snapshotArray['product']['typeId'];
+                 }
 
-    }// end foreach order
 
-      $productsCount = count($products);
-      $variantsCount = count($variants);
-      $customersCount = count($customers);
-
-      usort($products, function($a, $b) {
-          return $b['total'] <=> $a['total'];
-      });
-      usort($variants, function($a, $b) {
-          return $b['total'] <=> $a['total'];
-      });
-
-    $returnObject =  [
-      'products' => $products,
-      'variants' => $variants,
-      'totals' => [
-        'products' => $productsCount,
-        'variants' => $variantsCount,
-        'customers' => $customersCount,
-        'orders' => $ordersCount,
-        'qty' => $qtyTotal,
-        'total' => $totalTotal,
-        'subtotal' => $subtotalTotal
-      ]
-
-    ];
-
-    //print_r($returnObject);
-
-    return $returnObject;
+             }
 
 
 
+             $qtyTotal   = $qtyTotal + $lineItem->qty;
+             $totalTotal = $totalTotal + $lineItem->total;
+             $subtotalTotal = $subtotalTotal + $lineItem->subtotal;
+
+             if(!array_key_exists( $snapshotArray['product']['id'], $products))
+             {
+
+                 $productData = [
+
+                   'productId'     => $snapshotArray['product']['id'],
+                   'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
+                   'productTitle'  => $snapshotArray['product']['title'],
+                   'qty'  => $lineItem->qty,
+                   'subtotal'  => $lineItem->subtotal,
+                   'total'  => $lineItem->total,
 
 
-} // close get purchases by date
+                 ];
+
+                 $products[ $snapshotArray['product']['id'] ] = $productData;
+             }
+             else
+             {
+                $products[ $snapshotArray['product']['id'] ]['subtotal'] = $products[ $snapshotArray['product']['id'] ]['subtotal'] + $lineItem->subtotal;
+                $products[ $snapshotArray['product']['id'] ]['total'] = $products[ $snapshotArray['product']['id'] ]['total'] + $lineItem->total;
+                $products[ $snapshotArray['product']['id'] ]['qty'] = $products[ $snapshotArray['product']['id'] ]['qty'] + $lineItem->qty;
+
+             }
+
+             if(!array_key_exists($snapshotArray['id'], $variants))
+             {
+
+                 $variantData = [
+                   'productId'     => $snapshotArray['product']['id'],
+                   'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
+                   'productTitle'  => $snapshotArray['product']['title'],
+                   'variantId'     => $snapshotArray['id'],
+                   'variantTitle'  => $snapshotArray['title'],
+                   'qty'  => $lineItem->qty,
+                   'subtotal'  => $lineItem->subtotal,
+                   'total'  => $lineItem->total,
+
+
+                 ];
+
+                 $variants[ $snapshotArray['id'] ] = $variantData;
+             }
+             else
+             {
+                $variants[ $snapshotArray['id'] ]['subtotal'] = $variants[ $snapshotArray['id'] ]['subtotal'] + $lineItem->subtotal;
+                $variants[ $snapshotArray['id'] ]['total'] = $variants[ $snapshotArray['id'] ]['total'] + $lineItem->total;
+                $variants[ $snapshotArray['id'] ]['qty'] = $variants[ $snapshotArray['id'] ]['qty'] + $lineItem->qty;
+
+             }
+
+
+             unset($variant);
+             unset($product);
+             unset($productData);
+             unset($variantData);
+             unset($snapshotArray);
+         } // end foreach lineitem
+
+     }// end foreach order
+
+       $productsCount = count($products);
+       $variantsCount = count($variants);
+       $customersCount = count($customers);
+
+       usort($products, function($a, $b) {
+           return $b['total'] <=> $a['total'];
+       });
+       usort($variants, function($a, $b) {
+           return $b['total'] <=> $a['total'];
+       });
+
+     $returnObject =  [
+       'products' => $products,
+       'variants' => $variants,
+       'totals' => [
+         'products' => $productsCount,
+         'variants' => $variantsCount,
+         'customers' => $customersCount,
+         'orders' => $ordersCount,
+         'qty' => $qtyTotal,
+         'total' => $totalTotal,
+         'subtotal' => $subtotalTotal
+       ]
+
+     ];
+
+     //print_r($returnObject);
+
+     return $returnObject;
+
+
+
+
+
+ } // close get best selling products
 
 
 
