@@ -82,21 +82,21 @@ class Commerceinsights extends Plugin
      *
      * @var string
      */
-    public $schemaVersion = '1.0.6';
+    public string $schemaVersion = '1.0.6';
 
     /**
      * Set to `true` if the plugin should have a settings view in the control panel.
      *
      * @var bool
      */
-    public $hasCpSettings = false;
+    public bool $hasCpSettings = false;
 
     /**
      * Set to `true` if the plugin should have its own section (main nav item) in the control panel.
      *
      * @var bool
      */
-    public $hasCpSection = true;
+    public bool $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
@@ -188,40 +188,29 @@ class Commerceinsights extends Plugin
              function(RegisterUserPermissionsEvent $event) {
 
 
-               $commerceInsightPermissions = array();
-
-               $commerceInsightPermissions[ 'commerceinsightsTransaction'] = array(
-                      'label' => 'View transactions'
-                  );
-                $commerceInsightPermissions[ 'commerceinsightsTransactionDownload'] = array(
-                       'label' => 'Download transactions'
-                   );
-
-
-
-               $commerceInsightPermissions[ 'commerceinsightsCustomers'] = array(
-                      'label' => 'View customer summaries'
-                  );
-                $commerceInsightPermissions[ 'commerceinsightsCustomersDownload'] = array(
-                       'label' => 'Download customer summaries'
-                   );
-
-
-
-               $commerceInsightPermissions[ 'commerceinsightsProducts'] = array(
-                      'label' => 'View product sales'
-                  );
-                $commerceInsightPermissions[ 'commerceinsightsProductsDownload'] = array(
-                       'label' => 'Download product sales'
-                   );
-
-
-
+      
                  // return those permissions
-                 $event->permissions[ 'CommerceInsights']  = [
-                   'commerceinsightsAccessModule' => [
-                       'label' => 'Access Commerce Insights',
-                       'nested' => $commerceInsightPermissions
+                 $event->permissions[]  = [
+                   'heading' => 'Commerce Insights',
+                   'permissions' => [
+                       'commerceinsightsTransaction' => [
+                         'label' => 'View transactions'
+                       ],
+                       'commerceinsightsTransactionDownload' => [
+                         'label' => 'Download transactions'
+                       ],
+                       'commerceinsightsCustomers' => [
+                         'label' => 'View customer summaries'
+                       ],
+                       'commerceinsightsCustomersDownload' => [
+                         'label' => 'Download customer summaries'
+                       ],
+                       'commerceinsightsProducts' => [
+                         'label' => 'View product sales'
+                       ],
+                       'commerceinsightsProductsDownload' => [
+                         'label' => 'Download product sales'
+                       ],
                     ]
                  ];
 
@@ -259,7 +248,7 @@ class Commerceinsights extends Plugin
     }
 
 
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         $parent = parent::getCpNavItem();
 
@@ -327,7 +316,7 @@ class Commerceinsights extends Plugin
      *
      * @return \craft\base\Model|null
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
     }

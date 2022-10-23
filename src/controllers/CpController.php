@@ -47,7 +47,7 @@ class CpController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = false;
+    protected array|int|bool $allowAnonymous = false;
 
     // Public Methods
     // =========================================================================
@@ -286,7 +286,7 @@ class CpController extends Controller
 
       $redirectUrl = $pageUrl."?startDate=".$startDate['date'];
 
-      return $this->redirectToPostedUrl($dates);
+      return $this->redirectToPostedUrl((object)$dates);
       return $this->redirect($redirectUrl);
     }
 

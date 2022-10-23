@@ -356,7 +356,7 @@ GROUP BY cv.id
               'co.email as orderEmail',
               'co.orderSiteId as orderSiteId',
               'co.customerId as customerId',
-              'cc.userId as userId',
+              'cu.id as userId',
               'cu.email as userEmail',
               'cu.firstname as userFirstName',
               'cu.lastName as userLastName',
@@ -385,34 +385,35 @@ GROUP BY cv.id
               'cs.name as siteName',
               'cs.handle as siteHandle',
 
-              'cosa.businessName as shippingBusinessName',
+              'cosa.organization as shippingOrganization',
               'cosa.firstName as shippingFirstName',
               'cosa.lastName as shippingLastName',
-              'cosa.address1 as shippingAddress1',
-              'cosa.address2 as shippingAddress2',
-              'cosa.address3 as shippingAddress3',
-              'cosa.city as shippingCity',
-              'cosa.zipCode as shippingPostcode',
+              'cosa.addressLine1 as shippingAddressLine1',
+              'cosa.addressLine2 as shippingAddressLine2',
+              'cosa.administrativeArea as shippingAdministrativeArea',
+              'cosa.locality as shippingLocality',
+              'cosa.countryCode as shippingCountryCode',
+              'cosa.postalCode as shippingPostalCode',
 
-              'coba.businessName as billingBusinessName',
+              'coba.organization as billingOrganization',
               'coba.firstName as billingFirstName',
               'coba.lastName as billingLastName',
-              'coba.address1 as billingAddress1',
-              'coba.address2 as billingAddress2',
-              'coba.address3 as billingAddress3',
-              'coba.city as billingCity',
-              'coba.zipCode as billingPostcode',
+              'coba.addressLine1 as billingAddressLine1',
+              'coba.addressLine2 as billingAddressLine2',
+              'coba.administrativeArea as billingAdministrativeArea',
+              'coba.locality as billingLocality',
+              'coba.countryCode as billingCountryCode',
+              'coba.postalCode as billingPostalCode',
           ]
             )
             ->from(['cli' => Table::LINEITEMS])
             ->leftJoin(['co' => Table::ORDERS],'co.id = cli.orderId')
-            ->leftJoin(['cc' => Table::CUSTOMERS],'cc.id = co.customerId')
-            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = cc.userId')
+            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = co.customerId')
             ->leftJoin(['cs' => CraftTable::SITES],'cs.id = co.orderSiteId')
             ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
             ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'clis.id = cli.lineitemStatusId')
-            ->leftJoin(['cosa' => Table::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => Table::ADDRESSES],'coba.id = co.billingAddressId')
+            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'cosa.id = co.shippingAddressId')
+            ->leftJoin(['coba' => CraftTable::ADDRESSES],'coba.id = co.billingAddressId')
             ->leftJoin(['p' => $productVariantsQuery ], 'p.variantDetailsId = cli.purchasableId')
             ->where('co.isCompleted = 1');
             /*
@@ -421,14 +422,14 @@ GROUP BY cv.id
 
             if ($startDate)
             {
-                $query->andWhere("co.datePaid >= :datePaidStart", [ ':datePaidStart' => $startDate ]);
+                $query->andWhere("co.dateOrdered >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
             }
 
             if ($endDate)
             {
-                $query->andWhere("co.datePaid <= :datePaidEnd", [ ':datePaidEnd' => $endDate ]);
+                $query->andWhere("co.dateOrdered <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
             }
-            $query->orderBy('co.datePaid ASC');
+            $query->orderBy('co.dateOrdered ASC');
             $purchases = $query->all();
 
             //print_r($purchases);
@@ -491,7 +492,7 @@ GROUP BY cv.id
               'co.email as orderEmail',
               'co.orderSiteId as orderSiteId',
               'co.customerId as customerId',
-              'cc.userId as userId',
+              'cu.id as userId',
               'cu.email as userEmail',
               'cu.firstname as userFirstName',
               'cu.lastName as userLastName',
@@ -519,34 +520,35 @@ GROUP BY cv.id
               'cs.name as siteName',
               'cs.handle as siteHandle',
 
-              'cosa.businessName as shippingBusinessName',
+              'cosa.organization as shippingOrganization',
               'cosa.firstName as shippingFirstName',
               'cosa.lastName as shippingLastName',
-              'cosa.address1 as shippingAddress1',
-              'cosa.address2 as shippingAddress2',
-              'cosa.address3 as shippingAddress3',
-              'cosa.city as shippingCity',
-              'cosa.zipCode as shippingPostcode',
+              'cosa.addressLine1 as shippingAddressLine1',
+              'cosa.addressLine2 as shippingAddressLine2',
+              'cosa.administrativeArea as shippingAdministrativeArea',
+              'cosa.locality as shippingLocality',
+              'cosa.countryCode as shippingCountryCode',
+              'cosa.postalCode as shippingPostalCode',
 
-              'coba.businessName as billingBusinessName',
+              'coba.organization as billingOrganization',
               'coba.firstName as billingFirstName',
               'coba.lastName as billingLastName',
-              'coba.address1 as billingAddress1',
-              'coba.address2 as billingAddress2',
-              'coba.address3 as billingAddress3',
-              'coba.city as billingCity',
-              'coba.zipCode as billingPostcode',
+              'coba.addressLine1 as billingAddressLine1',
+              'coba.addressLine2 as billingAddressLine2',
+              'coba.administrativeArea as billingAdministrativeArea',
+              'coba.locality as billingLocality',
+              'coba.countryCode as billingCountryCode',
+              'coba.postalCode as billingPostalCode',
           ]
             )
             ->from(['cli' => Table::LINEITEMS])
             ->leftJoin(['co' => Table::ORDERS],'co.id = cli.orderId')
-            ->leftJoin(['cc' => Table::CUSTOMERS],'cc.id = co.customerId')
-            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = cc.userId')
+            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = co.customerId')
             ->leftJoin(['cs' => CraftTable::SITES],'cs.id = co.orderSiteId')
             ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
             ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'clis.id = cli.lineitemStatusId')
-            ->leftJoin(['cosa' => Table::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => Table::ADDRESSES],'coba.id = co.billingAddressId')
+            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'cosa.id = co.shippingAddressId')
+            ->leftJoin(['coba' => CraftTable::ADDRESSES],'coba.id = co.billingAddressId')
             ->where('co.isCompleted = 1')
             ->andWhere(['in','cli.purchasableId', $purchasableIds]);
 

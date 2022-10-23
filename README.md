@@ -39,4 +39,11 @@ See which products were purchased between two dates and who by, and the order st
 See, and export, which products sold best between two dates.
 
 ## Requirements
-This plugin requires Craft 3.0.0+ and the Craft Commerce 3.0.0+ plugin to be installed and enabled.
+This plugin requires Craft 4.0.0+ and the Craft Commerce 4.0.0+ plugin to be installed and enabled.
+
+
+## Roadmap
+A few new reports are on their way. including
+- Refunds
+- Discounts
+- Automated reports sent via Email

@@ -119,8 +119,7 @@ class Customers extends Component
           ]
             )
             ->from(['co' => Table::ORDERS])
-            ->leftJoin(['cc' => Table::CUSTOMERS],'cc.id = co.customerId')
-            ->leftJoin(['u' => CraftTable::USERS],'u.id = cc.userId')
+            ->leftJoin(['u' => CraftTable::USERS],'u.id = co.customerId')
 
             ->where('co.isCompleted = 1')
             ->groupBy(['co.customerId', 'co.email'])

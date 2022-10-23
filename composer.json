@@ -2,7 +2,7 @@
     "name": "dispositiontools/craft-commerceinsights",
     "description": "Get the low down on how your Craft Commerce store is doing. Explore and export customer summaries, product purchases, and transactions.",
     "type": "craft-plugin",
-    "version": "1.0.10",
+    "version": "4.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -24,13 +24,8 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
-        "craftcms/cms": "^3.2.0"
-    },
-    "require-dev": {
-      "craftcms/cms": "^3.2.0",
-      "codeception/codeception": "^3.0",
-      "vlucas/phpdotenv": "^3.0"
+        "php": ">=8.0.2",
+        "craftcms/cms": "^4.0.0"
     },
     "autoload": {
         "psr-4": {

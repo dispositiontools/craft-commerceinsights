@@ -56,12 +56,6 @@ class Transactions extends Component
      */
     public function getTransactions($options)
     {
-        $result = 'something';
-        // Check our Plugin's settings for `someAttribute`
-        if (Commerceinsights::$plugin->getSettings()->someAttribute) {
-        }
-
-
 
         $transactionsQuery = (new Query())
             ->select([
@@ -85,33 +79,35 @@ class Transactions extends Component
               'cos.name',
               'cos.handle',
               'cos.color',
-              'cosa.businessName as shippingBusinessName',
+              'cosa.organization as shippingOrganization',
               'cosa.firstName as shippingFirstName',
               'cosa.lastName as shippingLastName',
-              'cosa.address1 as shippingAddress1',
-              'cosa.address2 as shippingAddress2',
-              'cosa.address3 as shippingAddress3',
-              'cosa.city as shippingCity',
-              'cosa.zipCode as shippingPostcode',
+              'cosa.addressLine1 as shippingAddressLine1',
+              'cosa.addressLine2 as shippingAddressLine2',
+              'cosa.administrativeArea as shippingAdministrativeArea',
+              'cosa.locality as shippingLocality',
+              'cosa.countryCode as shippingCountryCode',
+              'cosa.postalCode as shippingPostalCode',
 
-              'coba.businessName as billingBusinessName',
+              'coba.organization as billingOrganization',
               'coba.firstName as billingFirstName',
               'coba.lastName as billingLastName',
-              'coba.address1 as billingAddress1',
-              'coba.address2 as billingAddress2',
-              'coba.address3 as billingAddress3',
-              'coba.city as billingCity',
-              'coba.zipCode as billingPostcode',
+              'coba.addressLine1 as billingAddressLine1',
+              'coba.addressLine2 as billingAddressLine2',
+              'coba.administrativeArea as billingAdministrativeArea',
+              'coba.locality as billingLocality',
+              'coba.countryCode as billingCountryCode',
+              'coba.postalCode as billingPostalCode',
               ]
             )
             ->from(['ct' => Table::TRANSACTIONS])
             ->leftJoin(['cg' => Table::GATEWAYS],'cg.id = ct.gatewayId')
             ->leftJoin(['co' => Table::ORDERS],'co.id = ct.orderId')
             ->leftJoin(['cc' => Table::CUSTOMERS],'cc.id = co.customerId')
-            ->leftJoin(['u' => CraftTable::USERS],'u.id = cc.userId')
+            ->leftJoin(['u' => CraftTable::USERS],'u.id = co.customerId')
             ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
-            ->leftJoin(['cosa' => Table::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => Table::ADDRESSES],'coba.id = co.billingAddressId');
+            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'cosa.id = co.shippingAddressId')
+            ->leftJoin(['coba' => CraftTable::ADDRESSES],'coba.id = co.billingAddressId');
 
 
             if( array_key_exists('transactionStatus' , $options) )

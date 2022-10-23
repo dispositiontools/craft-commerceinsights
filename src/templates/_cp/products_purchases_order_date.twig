@@ -132,7 +132,7 @@ Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-
 
         <td><a href="{{ url('commerce/orders/'~purchase.orderId) }}">{{ purchase.orderId }}</a></td>
         <td>{{ purchase.orderTotalPaid }}</td>
-        <td><a href="{{ url('commerce/customers/'~purchase.customerId) }}">{{ purchase.orderEmail }}</a></td>
+        <td><a href="{{ url('users/'~purchase.customerId) }}">{{ purchase.orderEmail }}</a></td>
         <td><span class="commerceStatusLabel" data-orderstatus="{{ purchase.orderStatusHandle }}" title="{{ purchase.orderStatusName }}"><span class="status {{ purchase.orderStatusColor }}"></span></span></td>
         <td>{{ purchase.siteName }}</td>
         <td><a href="{{ url('users/'~purchase.userId) }}">{{ purchase.userFirstName }} {{ purchase.userLastName }}</a></td>
