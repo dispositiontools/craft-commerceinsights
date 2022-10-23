@@ -421,14 +421,14 @@ GROUP BY cv.id
 
             if ($startDate)
             {
-                $query->andWhere("co.datePaid >= :datePaidStart", [ ':datePaidStart' => $startDate ]);
+                $query->andWhere("co.dateOrdered >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
             }
 
             if ($endDate)
             {
-                $query->andWhere("co.datePaid <= :datePaidEnd", [ ':datePaidEnd' => $endDate ]);
+                $query->andWhere("co.dateOrdered <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
             }
-            $query->orderBy('co.datePaid ASC');
+            $query->orderBy('co.dateOrdered ASC');
             $purchases = $query->all();
 
             //print_r($purchases);

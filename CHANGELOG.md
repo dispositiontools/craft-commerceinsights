@@ -1,6 +1,13 @@
 # Release Notes for Commerce Insights
 
 
+## 1.0.11 - 2022-10-23
+
+### Changed
+- The purchases by date report now looked at the Date Ordered date rather than the Date Paid date. This is because the Date Paid date is removed when a refund is issued which means certain orders weren't being included in this report. The report still only includes orders that are marked as complete.
+- Corrected a couple of links in the dashboard reports
+
+
 ## 1.0.10 - 2022-10-09
 
 ### Updated
