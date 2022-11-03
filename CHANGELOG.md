@@ -1,5 +1,10 @@
 # Release Notes for Commerce Insights
 
+## 4.0.1 - 2022-11-03
+
+### Fixed
+- Updated the plugin to work with PostgreSql. Fixing issue [#4](https://github.com/dispositiontools/craft-commerceinsights/issues/5)
+
 ## 4.0.0 - 2022-10-23
 
 ### Updated

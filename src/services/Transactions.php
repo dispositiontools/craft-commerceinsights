@@ -101,34 +101,33 @@ class Transactions extends Component
               ]
             )
             ->from(['ct' => Table::TRANSACTIONS])
-            ->leftJoin(['cg' => Table::GATEWAYS],'cg.id = ct.gatewayId')
-            ->leftJoin(['co' => Table::ORDERS],'co.id = ct.orderId')
-            ->leftJoin(['cc' => Table::CUSTOMERS],'cc.id = co.customerId')
-            ->leftJoin(['u' => CraftTable::USERS],'u.id = co.customerId')
-            ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
-            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => CraftTable::ADDRESSES],'coba.id = co.billingAddressId');
+            ->leftJoin(['cg' => Table::GATEWAYS],'[[cg.id]] = [[ct.gatewayId]]')
+            ->leftJoin(['co' => Table::ORDERS],'[[co.id]] = [[ct.orderId]]')
+            ->leftJoin(['u' => CraftTable::USERS],'[[u.id]] = [[co.customerId]]')
+            ->leftJoin(['cos' => Table::ORDERSTATUSES],'[[cos.id]] = [[co.orderStatusId]]')
+            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'[[cosa.id]] = [[co.shippingAddressId]]')
+            ->leftJoin(['coba' => CraftTable::ADDRESSES],'[[coba.id]] = [[co.billingAddressId]]');
 
 
             if( array_key_exists('transactionStatus' , $options) )
             {
-                $transactionsQuery->where("ct.status = :transactionStatus", [ ':transactionStatus' => $options['transactionStatus'] ]);
+                $transactionsQuery->where("[[ct.status]] = :transactionStatus", [ ':transactionStatus' => $options['transactionStatus'] ]);
             }
             else
             {
               // code...
-              $transactionsQuery->where("ct.status='success'");
+              $transactionsQuery->where("[[ct.status]] = 'success'");
             }
 
 
             if( array_key_exists('afterDate' , $options) )
             {
-                $transactionsQuery->andWhere("ct.dateCreated > :afterDate", [ ':afterDate' => $options['afterDate'] ]);
+                $transactionsQuery->andWhere('[[ct.dateCreated]] > :afterDate', [ ':afterDate' => $options['afterDate'] ]);
             }
 
             if( array_key_exists('beforeDate' , $options) )
             {
-                $transactionsQuery->andWhere("ct.dateCreated <= :beforeDate", [ ':beforeDate' => $options['beforeDate'] ]);
+                $transactionsQuery->andWhere('[[ct.dateCreated]] <= :beforeDate', [ ':beforeDate' => $options['beforeDate'] ]);
             }
 
             $transactions = $transactionsQuery->all();

@@ -48,6 +48,7 @@
       <table class="data fullwidth ">
       <thead>
         <tr>
+          <th>User Id</th>
           <th>Email</th>
           <th>User</th>
           <th>Number of orders</th>
@@ -64,8 +65,9 @@
       <tbody>
       {% for customer in customers %}
           <tr>
-              <td>{{ customer.orderEmail }}</td>
-              <td><a href="{{ url('users/'~customer.orderUserId) }}">{{ customer.userFirstName }} {{ customer.userLastName }}</a></td>
+              <td>{{ customer.orderUserId }}</td>
+              <td><a href="{{ url('users/'~customer.orderUserId) }}">{{ customer.userEmail }}</a></td>
+              <td>{{ customer.userFullName }}</td>
               <td>{{ customer.numberOfOrders }}</td>
               <td>{{ customer.ordersTotalPrice|number_format }}</td>
               <td>{{ customer.avgOrderTotalPrice|number_format }}</td>

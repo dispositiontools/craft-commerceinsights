@@ -17,6 +17,7 @@ use craft\base\Component;
 
 
 use craft\commerce\elements\Product as ProductElement;
+use craft\commerce\elements\Variant as VariantElement;
 use craft\commerce\elements\Order as OrderElement;
 use craft\commerce\services\ProductTypes;
 use craft\commerce\Plugin as Commerce;
@@ -321,7 +322,7 @@ cp.id as productId,
 cvc.title as variantTitle,
 cpc.title as productTitle
 FROM craft_commerce_variants as cv
-LEFT JOIN craft_commerce_products as cp on cp.id = cv.productId
+LEFT JOIN craft_commerce_products as cp on "cp"."id" = "cv"."productId"
 LEFT JOIN craft_content as cvc on cvc.elementId = cv.id
 LEFT JOIN craft_content as cpc on cpc.elementId = cp.id
 GROUP BY cv.id
@@ -339,26 +340,29 @@ GROUP BY cv.id
 
           ])
           ->from(['cv' => Table::VARIANTS])
-          ->leftJoin(['cp' => Table::PRODUCTS],'cp.id = cv.productId')
-          ->leftJoin(['cpt' => Table::PRODUCTTYPES],'cpt.id = cp.typeId')
-          ->leftJoin(['cvc' => CraftTable::CONTENT],'cvc.elementId = cv.id')
-          ->leftJoin(['cpc' => CraftTable::CONTENT],'cpc.elementId = cp.id')
-          ->groupBy('cv.id');
+          ->leftJoin(['cp' => Table::PRODUCTS],'[[cp.id]] = [[cv.productId]]')
+          ->leftJoin(['cpt' => Table::PRODUCTTYPES],'[[cpt.id]] = [[cp.typeId]]')
+          ->leftJoin(['cvc' => CraftTable::CONTENT],'[[cvc.elementId]] = [[cv.id]]')
+          ->leftJoin(['cpc' => CraftTable::CONTENT],'[[cpc.elementId]] = [[cp.id]]')
+          ->where('[[co.isCompleted]] = true');
+
 
 
         $query = (new Query())
             ->select([
+              /*
               'p.productTypeId',
               'p.productTypeName',
               'p.productTitle',
               'p.variantTitle',
+              */
               'co.id as orderId',
               'co.email as orderEmail',
               'co.orderSiteId as orderSiteId',
               'co.customerId as customerId',
               'cu.id as userId',
               'cu.email as userEmail',
-              'cu.firstname as userFirstName',
+              'cu.firstName as userFirstName',
               'cu.lastName as userLastName',
               'co.gatewayId as orderGatewayId',
               'co.number as orderNumber',
@@ -370,6 +374,8 @@ GROUP BY cv.id
               'cos.name as orderStatusName',
               'cos.handle as orderStatusHandle',
               'cos.color as orderStatusColor',
+              'cli.purchasableId as purchasableId' ,
+              'cli.snapshot as purchasableSnapshot' ,
               'clis.name as lineItemStatusName',
               'clis.handle as lineItemStatusHandle',
               'clis.color as lineItemStatusColor',
@@ -407,32 +413,69 @@ GROUP BY cv.id
           ]
             )
             ->from(['cli' => Table::LINEITEMS])
-            ->leftJoin(['co' => Table::ORDERS],'co.id = cli.orderId')
-            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = co.customerId')
-            ->leftJoin(['cs' => CraftTable::SITES],'cs.id = co.orderSiteId')
-            ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
-            ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'clis.id = cli.lineitemStatusId')
-            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => CraftTable::ADDRESSES],'coba.id = co.billingAddressId')
-            ->leftJoin(['p' => $productVariantsQuery ], 'p.variantDetailsId = cli.purchasableId')
-            ->where('co.isCompleted = 1');
+            ->leftJoin(['co' => Table::ORDERS],'[[co.id]] = [[cli.orderId]]')
+            ->leftJoin(['cu' => CraftTable::USERS],'[[cu.id]] = [[co.customerId]]')
+            ->leftJoin(['cs' => CraftTable::SITES],'[[cs.id]] = [[co.orderSiteId]]')
+            ->leftJoin(['cos' => Table::ORDERSTATUSES],'[[cos.id]] = [[co.orderStatusId]]')
+            ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'[[clis.id]] = [[cli.lineItemStatusId]]')
+            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'[[cosa.id]] = [[co.shippingAddressId]]')
+            ->leftJoin(['coba' => CraftTable::ADDRESSES],'[[coba.id]] = [[co.billingAddressId]]')
+            //->leftJoin(['p' => $productVariantsQuery ], '[[p.variantDetailsId]] = [[cli.purchasableId]]')
+            ->where('[[co.isCompleted]] = true');
             /*
                     AND co.datePaid > '2020-12-01'  and co.datePaid < '2021-01-01'
             */
 
             if ($startDate)
             {
-                $query->andWhere("co.dateOrdered >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
+                $query->andWhere('[[co.dateOrdered]] >= :dateOrderedStart', [ ':dateOrderedStart' => $startDate ]);
             }
 
             if ($endDate)
             {
-                $query->andWhere("co.dateOrdered <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
+                $query->andWhere('[[co.dateOrdered]] <= :dateOrderedEnd', [ ':dateOrderedEnd' => $endDate ]);
             }
-            $query->orderBy('co.dateOrdered ASC');
+            $query->orderBy('[[co.dateOrdered]] ASC');
             $purchases = $query->all();
 
-            //print_r($purchases);
+             $productTypes = [];
+
+            foreach ($purchases as $key => $purchase)
+            {
+
+              $purchasableSnapshot = json_decode($purchase['purchasableSnapshot'], true);
+
+
+
+
+              if(!array_key_exists($purchasableSnapshot['product']['typeId'], $productTypes))
+              {
+                  $productType = Commerce::getInstance()->ProductTypes->getProductTypeById($purchasableSnapshot['product']['typeId']);
+                  if($productType)
+                  {
+                      $productTypes[ $purchasableSnapshot['product']['typeId'] ] = $productType->name;
+                      unset( $productType );
+                  }
+                  else
+                  {
+                      $productTypes[ $purchasableSnapshot['product']['typeId'] ] = $snapshotArray['product']['typeId'];
+                  }
+
+
+              }
+
+
+              $purchases[$key]['variantTitle'] = $purchasableSnapshot['title'];
+              $purchases[$key]['productTitle'] = $purchasableSnapshot['product']['title'];
+              $purchases[$key]['productTypeId'] = $purchasableSnapshot['product']['typeId'];
+              $purchases[$key]['productTypeName'] = $productTypes[ $purchasableSnapshot['product']['typeId'] ];
+
+              unset($purchases[$key]['purchasableSnapshot']);
+              unset($purchase);
+            }
+
+
+
 
         return [
           'purchases' => $purchases,
@@ -476,7 +519,7 @@ GROUP BY cv.id
         // query to get purchasableIds
 
         $purchasableIdsQuery = (new Query())->select('cv.id')->from(['cv' => Table::VARIANTS])
-        ->where('cv.productId=:productId',[':productId'=>$productId])->all();
+        ->where('[[cv.productId]]=:productId',[':productId'=>$productId])->all();
 
 
         $purchasableIds = array();
@@ -494,7 +537,7 @@ GROUP BY cv.id
               'co.customerId as customerId',
               'cu.id as userId',
               'cu.email as userEmail',
-              'cu.firstname as userFirstName',
+              'cu.firstName as userFirstName',
               'cu.lastName as userLastName',
               'co.gatewayId as orderGatewayId',
               'co.number as orderNumber',
@@ -542,15 +585,15 @@ GROUP BY cv.id
           ]
             )
             ->from(['cli' => Table::LINEITEMS])
-            ->leftJoin(['co' => Table::ORDERS],'co.id = cli.orderId')
-            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = co.customerId')
-            ->leftJoin(['cs' => CraftTable::SITES],'cs.id = co.orderSiteId')
-            ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
-            ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'clis.id = cli.lineitemStatusId')
-            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => CraftTable::ADDRESSES],'coba.id = co.billingAddressId')
-            ->where('co.isCompleted = 1')
-            ->andWhere(['in','cli.purchasableId', $purchasableIds]);
+            ->leftJoin(['co' => Table::ORDERS],'[[co.id]] = [[cli.orderId]]')
+            ->leftJoin(['cu' => CraftTable::USERS],'[[cu.id]] = [[co.customerId]]')
+            ->leftJoin(['cs' => CraftTable::SITES],'[[cs.id]] = [[co.orderSiteId]]')
+            ->leftJoin(['cos' => Table::ORDERSTATUSES],'[[cos.id]] = [[co.orderStatusId]]')
+            ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'[[clis.id]] = [[cli.lineItemStatusId]]')
+            ->leftJoin(['cosa' => CraftTable::ADDRESSES],'[[cosa.id]] = [[co.shippingAddressId]]')
+            ->leftJoin(['coba' => CraftTable::ADDRESSES],'[[coba.id]] = [[co.billingAddressId]]')
+            ->where('[[co.isCompleted]] = true')
+            ->andWhere(['in','[[cli.purchasableId]]', $purchasableIds]);
 
             $purchases = $query->all();
 

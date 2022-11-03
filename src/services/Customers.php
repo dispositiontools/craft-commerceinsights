@@ -97,32 +97,62 @@ class Customers extends Component
     public function getCustomers($productId = null)
     {
 
+        $dbDriver = Craft::$app->getConfig()->getDb()->driver;
+
+        switch($dbDriver)
+        {
+          case "pgsql":
+
+
+                $selectArray = [
+                  'count([[co.id]]) as numberOfOrders',
+                  'SUM([[totalPrice]]) as ordersTotalPrice',
+                  '( SUM([[totalPrice]]) / count(co.id) ) as avgOrderTotalPrice',
+                  'MIN([[totalPrice]]) as minOrderTotalPrice',
+                  'MAX([[totalPrice]]) as maxOrderTotalPrice',
+                  'MIN([[dateOrdered]]) as firstOrderDate',
+                  'MAX([[dateOrdered]]) as lastOrderDate',
+                  "DATE_PART('day', MAX([[dateOrdered]])- MIN([[dateOrdered]]) ) as daysBetweenFirstandLastOrder",
+                  "DATE_PART('day', CURRENT_DATE -  MAX([[dateOrdered]]) ) as daysSinceLastOrder",
+                  'co.customerId as orderUserId',
+                  'u.email as userEmail',
+                  'u.fullName as userFullName'
+                ];
+            break;
+
+
+
+
+
+          case "mysql":
+
+                $selectArray = [
+                  'count([[co.id]]) as numberOfOrders',
+                  'SUM([[totalPrice]]) as ordersTotalPrice',
+                  '( SUM([[totalPrice]]) / count(co.id) ) as avgOrderTotalPrice',
+                  'MIN([[totalPrice]]) as minOrderTotalPrice',
+                  'MAX([[totalPrice]]) as maxOrderTotalPrice',
+                  'MIN([[dateOrdered]]) as firstOrderDate',
+                  'MAX([[dateOrdered]]) as lastOrderDate',
+                  'DATEDIFF( MAX([[dateOrdered]]), MIN([[dateOrdered]]) ) as daysBetweenFirstandLastOrder',
+                  'DATEDIFF( CURDATE(),  MAX([[dateOrdered]]) ) as daysSinceLastOrder',
+                  'co.customerId as orderUserId',
+                  'u.email as userEmail',
+                  'u.fullName as userFullName'
+                ];
+
+            break;
+        }
+
 
 
         $query = (new Query())
-            ->select([
-              'co.customerId',
-              'count(co.id) as numberOfOrders',
-              'SUM(totalPrice) as ordersTotalPrice',
-              '( SUM(totalPrice) / count(co.id) ) as avgOrderTotalPrice',
-              'MIN(totalPrice) as minOrderTotalPrice',
-              'MAX(totalPrice) as maxOrderTotalPrice',
-              'MIN(dateOrdered) as firstOrderDate',
-              'MAX(dateOrdered) as lastOrderDate',
-              'DATEDIFF( MAX(dateOrdered), MIN(dateOrdered) ) as daysBetweenFirstandLastOrder',
-              'DATEDIFF( CURDATE(),  MAX(dateOrdered) ) as daysSinceLastOrder',
-              'u.id as orderUserId',
-              'u.firstName as userFirstName',
-              'u.lastName as userLastName',
-              'u.email as userEmail',
-              'co.email as orderEmail'
-          ]
-            )
+            ->select($selectArray)
             ->from(['co' => Table::ORDERS])
-            ->leftJoin(['u' => CraftTable::USERS],'u.id = co.customerId')
+            ->leftJoin(['u' => CraftTable::USERS],'[[u.id]] = [[co.customerId]]')
 
-            ->where('co.isCompleted = 1')
-            ->groupBy(['co.customerId', 'co.email'])
+            ->where('[[co.isCompleted]] = true')
+            ->groupBy(['[[co.customerId]]', '[[u.email]]','[[u.fullName]]'])
             ->orderBy([
               'ordersTotalPrice' => SORT_DESC,
             ]);

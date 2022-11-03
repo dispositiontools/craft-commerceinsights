@@ -124,6 +124,7 @@ Last transaction: <b>{{ stats.lastTransactionDate }}</b>
     <table class="data fullwidth">
     <thead>
       <tr>
+        <th>Date</th>
         <th>Id</th>
         <th>Gateway</th>
         <th>Amount</th>
@@ -137,7 +138,10 @@ Last transaction: <b>{{ stats.lastTransactionDate }}</b>
     <tbody>
   {% for transaction in transactions %}
   <tr>
+    <td>{{ transaction.transactionDate }}</td>
+
     <td>{{ transaction.transactionId }}</td>
+
     <td>{{ transaction.gatewayName }}</td>
     <td style="text-align:right;">{{ transaction.transactionAmount|currency(transaction.paymentCurrency) }}</td>
     <td>{{ transaction.transactionStatus }}</td>
