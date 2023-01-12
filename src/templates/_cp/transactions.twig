@@ -13,7 +13,7 @@
  */
 #}
 {% requirePermission 'commerceinsightsTransaction' %}
-
+{% set selectedSubnavItem = 'transactions' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -80,6 +80,14 @@
 {% endif %}
 <p>&nbsp;</p>
 
+{% set currencies = craft.commerce.paymentCurrencies.allPaymentCurrencies %}
+{% set baseCurrency = false %}
+{% for currency in currencies %}
+  {% if currency.primary %}
+    {% set baseCurrency = currency %}
+  {% endif %}
+{% endfor %}
+
 
 <h3>Transaction summary for {{ startDate|date("Y-m-d") }} - {{ endDate|date("Y-m-d") }}</h3>
 <table>
@@ -94,14 +102,14 @@
   <td><b>Paid</b></td>
   <td style="text-align:right;">{{ stats.totalPaid }}</td>
   <td style="text-align:right;">{{ stats.numberOfPaidTransactions }}</td>
-  <td style="text-align:right;">{{ stats.averagePaid|number_format(2) }}</td>
+  <td style="text-align:right;">{{ stats.averagePaid|commerceCurrency(baseCurrency,convert=true) }}</td>
 </tr>
 
 <tr>
   <td><b>Refunded</b></td>
   <td style="text-align:right;">{{ stats.totalRefunded }}</td>
   <td style="text-align:right;">{{ stats.numberOfRefunds }}</td>
-  <td style="text-align:right;">{{ stats.averageRefunded|number_format(2) }}</td>
+  <td style="text-align:right;">{{ stats.averageRefunded|commerceCurrency(baseCurrency,convert=true) }}</td>
 </tr>
 
 <tr>
@@ -143,7 +151,7 @@ Last transaction: <b>{{ stats.lastTransactionDate }}</b>
     <td>{{ transaction.transactionId }}</td>
 
     <td>{{ transaction.gatewayName }}</td>
-    <td style="text-align:right;">{{ transaction.transactionAmount|currency(transaction.paymentCurrency) }}</td>
+    <td style="text-align:right;">{{ transaction.transactionAmount|commerceCurrency(baseCurrency,convert=true) }}</td>
     <td>{{ transaction.transactionStatus }}</td>
     <td>{{ transaction.transactionType }}</td>
     <td><a href="{{ url('commerce/orders/'~transaction.orderId) }}">{{ transaction.orderReference }}</a></td>

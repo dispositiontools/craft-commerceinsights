@@ -1,6 +1,6 @@
 <?php
 /**
- * Commerce Insights plugin for Craft CMS 3.x
+ * Commerce Insights plugin for Craft CMS 4.x
  *
  * Get the low down on how your Commerce is doing
  *

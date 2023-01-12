@@ -1,5 +1,13 @@
 # Release Notes for Commerce Insights
 
+## 4.0.2 - 2023-01-12
+
+### Fixed
+- Fixed an issue with the subnav items not showing the correct current page. Fixing issue [#6](https://github.com/dispositiontools/craft-commerceinsights/issues/6)
+
+### Updated
+- Now showing the amounts in the base currency number format. Fixing issue [#7](https://github.com/dispositiontools/craft-commerceinsights/issues/7)
+
 ## 4.0.1 - 2022-11-03
 
 ### Fixed

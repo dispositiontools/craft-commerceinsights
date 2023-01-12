@@ -13,6 +13,7 @@
  */
 #}
 {% requirePermission 'commerceinsightsCustomers' %}
+{% set selectedSubnavItem = 'customers' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -26,6 +27,15 @@
 
 
 {% set content %}
+
+    {% set currencies = craft.commerce.paymentCurrencies.allPaymentCurrencies %}
+    {% set baseCurrency = false %}
+    {% for currency in currencies %}
+      {% if currency.primary %}
+        {% set baseCurrency = currency %}
+      {% endif %}
+    {% endfor %}
+
 
     <p>
       <a href="{{ url('commerceinsights/customers') }}">&lt; back to Customer  </a>

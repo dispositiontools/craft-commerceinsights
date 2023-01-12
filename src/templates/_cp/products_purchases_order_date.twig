@@ -13,6 +13,7 @@
  */
 #}
 {% requirePermission 'commerceinsightsProducts' %}
+{% set selectedSubnavItem = 'products' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 {% set fullPageForm = false %}
@@ -51,6 +52,17 @@
 {% endblock %}
 
 {% set content %}
+
+
+    {% set currencies = craft.commerce.paymentCurrencies.allPaymentCurrencies %}
+    {% set baseCurrency = false %}
+    {% for currency in currencies %}
+      {% if currency.primary %}
+        {% set baseCurrency = currency %}
+      {% endif %}
+    {% endfor %}
+
+
 
 <p>
   <a href="{{ url('commerceinsights/products') }}">&lt; back to products </a>
@@ -119,11 +131,11 @@ Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-
         <td>{{ purchase.variantTitle }}</td>
 
         <td>{{ purchase.lineItemQty }}</td>
-        <td>{{ purchase.lineItemPrice|number_format(2, '.', ',') }}</td>
-        <td>{{ purchase.lineItemSalePrice|number_format(2, '.', ',') }}</td>
-        <td><span >{{ purchase.lineItemSaleAmount|number_format(2, '.', ',') }}</span></td>
-        <td><b>{{ purchase.lineItemSubtotal|number_format(2, '.', ',') }}</b></td>
-        <td><b>{{ purchase.lineItemTotal|number_format(2, '.', ',') }}</b></td>
+        <td>{{ purchase.lineItemPrice|commerceCurrency(baseCurrency,convert=true) }}</td>
+        <td>{{ purchase.lineItemSalePrice|commerceCurrency(baseCurrency,convert=true) }}</td>
+        <td><span >{{ purchase.lineItemSaleAmount|commerceCurrency(baseCurrency,convert=true) }}</span></td>
+        <td><b>{{ purchase.lineItemSubtotal|commerceCurrency(baseCurrency,convert=true) }}</b></td>
+        <td><b>{{ purchase.lineItemTotal|commerceCurrency(baseCurrency,convert=true) }}</b></td>
 
         {#
         <td>{{ purchase.lineItemNote }}</td>

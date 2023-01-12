@@ -13,6 +13,7 @@
  */
 #}
 {% requirePermission 'commerceinsightsCustomers' %}
+{% set selectedSubnavItem = 'customers' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -26,6 +27,16 @@
 
 
 {% set content %}
+
+
+    {% set currencies = craft.commerce.paymentCurrencies.allPaymentCurrencies %}
+    {% set baseCurrency = false %}
+    {% for currency in currencies %}
+      {% if currency.primary %}
+        {% set baseCurrency = currency %}
+      {% endif %}
+    {% endfor %}
+
 
     <p>
       <a href="{{ url('commerceinsights') }}">&lt; back to Dashboard  </a>
@@ -69,10 +80,10 @@
               <td><a href="{{ url('users/'~customer.orderUserId) }}">{{ customer.userEmail }}</a></td>
               <td>{{ customer.userFullName }}</td>
               <td>{{ customer.numberOfOrders }}</td>
-              <td>{{ customer.ordersTotalPrice|number_format }}</td>
-              <td>{{ customer.avgOrderTotalPrice|number_format }}</td>
-              <td>{{ customer.minOrderTotalPrice|number_format }}</td>
-              <td>{{ customer.maxOrderTotalPrice|number_format }}</td>
+              <td>{{ customer.ordersTotalPrice|commerceCurrency(baseCurrency,convert=true) }}</td>
+              <td>{{ customer.avgOrderTotalPrice|commerceCurrency(baseCurrency,convert=true) }}</td>
+              <td>{{ customer.minOrderTotalPrice|commerceCurrency(baseCurrency,convert=true) }}</td>
+              <td>{{ customer.maxOrderTotalPrice|commerceCurrency(baseCurrency,convert=true) }}</td>
               <td>{{ customer.firstOrderDate|date("Y-m-d") }}</td>
               <td>{{ customer.lastOrderDate|date("Y-m-d") }}</td>
               <td>{{ customer.daysBetweenFirstandLastOrder }}</td>
