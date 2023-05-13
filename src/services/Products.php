@@ -58,7 +58,7 @@ class Products extends Component
      */
     public function getProductsByProductType($productType)
     {
-        $result = 'something';
+        $result = 'Products by product type';
 
         if(is_int($productType))
         {
@@ -99,7 +99,25 @@ class Products extends Component
     }
 
 
+    public function getDonationDetails()
+    {
+        $donationElement = Commerce::getInstance()->getDonation();
+        if ($donationElement)
+        {
+          $donationPurchasableId =  $donationElement->id;
+          $isDonationAvailable = $donationElement->isAvailable;
+        }
+        else{
+          $donationPurchasableId = 0;
+          $isDonationAvailable = false;
+        }
 
+        return [
+          "element" => $donationElement,
+          "donationPurchasableId" => $donationPurchasableId,
+          "isDonationAvailable" => $isDonationAvailable
+        ];
+    }
 
 
 /**
@@ -107,14 +125,21 @@ class Products extends Component
  *
  * From any other plugin file, call it like this:
  *
- *     Commerceinsights::$plugin->products->getPurchasesByOrderDates($startDate,$endDate);
+ *     Commerceinsights::$plugin->products->getBestSellingProducts($startDate,$endDate);
  *
  * @return mixed
  */
  public function getBestSellingProducts($startDate=false,$endDate=false)
  {
 
-     $orderQuery = OrderElement::find()->isCompleted(true);
+    $donationDetails = $this->getDonationDetails();
+    $donationPurchasableId =  $donationDetails['donationPurchasableId'];
+    $isDonationAvailable = $donationDetails['isDonationAvailable'];
+
+
+
+
+     $orderQuery = OrderElement::find()->isCompleted(true);/*
      if($startDate && $endDate)
      {
          $orderQuery->dateOrdered(['and', ">= {$startDate}", "< {$endDate}"]);
@@ -123,8 +148,24 @@ class Products extends Component
            $orderQuery->dateOrdered(">= {$startDate}");
      }elseif($endDate)
      {
-       $orderQuery->dateOrdered("< {$endDate}");
+       $orderQuery->dateOrdered("<= {$endDate}");
      }
+
+
+      echo $orderQuery->getRawSql();
+      die();
+      */
+     
+     if ($startDate)
+     {
+      $orderQuery->andWhere("DATE(dateOrdered) >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
+     }
+
+     if ($endDate)
+     {
+      $orderQuery->andWhere("DATE(dateOrdered) <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
+     }
+    
 
      //$orderQuery->limit(10);
 
@@ -162,8 +203,20 @@ class Products extends Component
              //$product = $variant->getProduct();
              $snapshotArray =  $lineItem->snapshot;
 
-
-             if(!array_key_exists($snapshotArray['product']['typeId'], $productTypes))
+             /*
+             
+              If there are donations then there will not be a product array in the snapshot. the snapshot will look more like this:
+              {"price":0,"sku":"DONATION-CC3","description":"Donation","purchasableId":6364,"cpEditUrl":"#","options":{"donationAmount":"20","giftaid":"Yes"},"sales":[]}
+             */
+            if (  array_key_exists('purchasableId',$snapshotArray ) && $snapshotArray['purchasableId'] == $donationPurchasableId )
+            {
+              $productTypes[ $snapshotArray['sku'] ] = "Donation";
+            }
+            elseif ( !array_key_exists('product',$snapshotArray ) )
+              {
+                $productTypes[$snapshotArray['sku']] = $snapshotArray['sku'];
+              }
+             elseif(!array_key_exists($snapshotArray['product']['typeId'], $productTypes))
              {
                  $productType = Commerce::getInstance()->ProductTypes->getProductTypeById($snapshotArray['product']['typeId']);
                  if($productType)
@@ -185,60 +238,122 @@ class Products extends Component
              $totalTotal = $totalTotal + $lineItem->total;
              $subtotalTotal = $subtotalTotal + $lineItem->subtotal;
 
-             if(!array_key_exists( $snapshotArray['product']['id'], $products))
+             // If donation: 
+             if (  array_key_exists('purchasableId',$snapshotArray ) && $snapshotArray['purchasableId'] == $donationPurchasableId )
              {
+                  if(!array_key_exists( $donationPurchasableId, $products))
+                  {
 
-                 $productData = [
+                      $productData = [
 
-                   'productId'     => $snapshotArray['product']['id'],
-                   'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
-                   'productTitle'  => $snapshotArray['product']['title'],
-                   'qty'  => $lineItem->qty,
-                   'subtotal'  => $lineItem->subtotal,
-                   'total'  => $lineItem->total,
+                        'productId'     => $donationPurchasableId,
+                        'productTypeName' => $productTypes[ $snapshotArray['sku'] ],
+                        'productTitle'  => "Donation",
+                        'qty'  => $lineItem->qty,
+                        'subtotal'  => $lineItem->subtotal,
+                        'total'  => $lineItem->total,
 
 
-                 ];
+                      ];
 
-                 $products[ $snapshotArray['product']['id'] ] = $productData;
+                      $products[ $donationPurchasableId ] = $productData;
+                  }
+                  else
+                  {
+                    $products[ $donationPurchasableId ]['subtotal'] = $products[ $donationPurchasableId ]['subtotal'] + $lineItem->subtotal;
+                    $products[ $donationPurchasableId ]['total'] = $products[ $donationPurchasableId ]['total'] + $lineItem->total;
+                    $products[ $donationPurchasableId ]['qty'] = $products[ $donationPurchasableId ]['qty'] + $lineItem->qty;
+
+                  }
+
+
+                  
+                  $donationVariantId =  $donationPurchasableId."-".$lineItem->subtotal;
+                  $donationVariantTitle = "Donation - ".$lineItem->subtotal;
+                  if(!array_key_exists( $donationVariantId , $variants))
+                    {
+      
+                        $variantData = [
+                          'productId'     => $donationPurchasableId,
+                          'productTypeName' => $productTypes[ $snapshotArray['sku'] ],
+                          'productTitle'  => "Donation",
+                          'variantId'     => $donationVariantId,
+                          'variantTitle'  => $donationVariantTitle,
+                          'qty'  => $lineItem->qty,
+                          'subtotal'  => $lineItem->subtotal,
+                          'total'  => $lineItem->total,
+      
+      
+                        ];
+      
+                        $variants[ $donationVariantId ] = $variantData;
+                    }
+                    else
+                    {
+                      $variants[ $donationVariantId ]['subtotal'] = $variants[ $donationVariantId ]['subtotal'] + $lineItem->subtotal;
+                      $variants[ $donationVariantId ]['total'] = $variants[ $donationVariantId ]['total'] + $lineItem->total;
+                      $variants[ $donationVariantId ]['qty'] = $variants[ $donationVariantId ]['qty'] + $lineItem->qty;
+      
+                    }
+
+
              }
-             else
+             elseif(array_key_exists('product', $snapshotArray)  )
              {
-                $products[ $snapshotArray['product']['id'] ]['subtotal'] = $products[ $snapshotArray['product']['id'] ]['subtotal'] + $lineItem->subtotal;
-                $products[ $snapshotArray['product']['id'] ]['total'] = $products[ $snapshotArray['product']['id'] ]['total'] + $lineItem->total;
-                $products[ $snapshotArray['product']['id'] ]['qty'] = $products[ $snapshotArray['product']['id'] ]['qty'] + $lineItem->qty;
-
+                  // if there is a product 
+                    if(    !array_key_exists( $snapshotArray['product']['id'], $products))
+                    {
+      
+                        $productData = [
+      
+                          'productId'     => $snapshotArray['product']['id'],
+                          'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
+                          'productTitle'  => $snapshotArray['product']['title'],
+                          'qty'  => $lineItem->qty,
+                          'subtotal'  => $lineItem->subtotal,
+                          'total'  => $lineItem->total,
+      
+      
+                        ];
+      
+                        $products[ $snapshotArray['product']['id'] ] = $productData;
+                    }
+                    else
+                    {
+                        $products[ $snapshotArray['product']['id'] ]['subtotal'] = $products[ $snapshotArray['product']['id'] ]['subtotal'] + $lineItem->subtotal;
+                        $products[ $snapshotArray['product']['id'] ]['total'] = $products[ $snapshotArray['product']['id'] ]['total'] + $lineItem->total;
+                        $products[ $snapshotArray['product']['id'] ]['qty'] = $products[ $snapshotArray['product']['id'] ]['qty'] + $lineItem->qty;
+      
+                    }
+      
+                    if(!array_key_exists($snapshotArray['id'], $variants))
+                    {
+      
+                        $variantData = [
+                          'productId'     => $snapshotArray['product']['id'],
+                          'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
+                          'productTitle'  => $snapshotArray['product']['title'],
+                          'variantId'     => $snapshotArray['id'],
+                          'variantTitle'  => $snapshotArray['title'],
+                          'qty'  => $lineItem->qty,
+                          'subtotal'  => $lineItem->subtotal,
+                          'total'  => $lineItem->total,
+      
+      
+                        ];
+      
+                        $variants[ $snapshotArray['id'] ] = $variantData;
+                    }
+                    else
+                    {
+                      $variants[ $snapshotArray['id'] ]['subtotal'] = $variants[ $snapshotArray['id'] ]['subtotal'] + $lineItem->subtotal;
+                      $variants[ $snapshotArray['id'] ]['total'] = $variants[ $snapshotArray['id'] ]['total'] + $lineItem->total;
+                      $variants[ $snapshotArray['id'] ]['qty'] = $variants[ $snapshotArray['id'] ]['qty'] + $lineItem->qty;
+      
+                    }
              }
+            
 
-             if(!array_key_exists($snapshotArray['id'], $variants))
-             {
-
-                 $variantData = [
-                   'productId'     => $snapshotArray['product']['id'],
-                   'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
-                   'productTitle'  => $snapshotArray['product']['title'],
-                   'variantId'     => $snapshotArray['id'],
-                   'variantTitle'  => $snapshotArray['title'],
-                   'qty'  => $lineItem->qty,
-                   'subtotal'  => $lineItem->subtotal,
-                   'total'  => $lineItem->total,
-
-
-                 ];
-
-                 $variants[ $snapshotArray['id'] ] = $variantData;
-             }
-             else
-             {
-                $variants[ $snapshotArray['id'] ]['subtotal'] = $variants[ $snapshotArray['id'] ]['subtotal'] + $lineItem->subtotal;
-                $variants[ $snapshotArray['id'] ]['total'] = $variants[ $snapshotArray['id'] ]['total'] + $lineItem->total;
-                $variants[ $snapshotArray['id'] ]['qty'] = $variants[ $snapshotArray['id'] ]['qty'] + $lineItem->qty;
-
-             }
-
-
-             unset($variant);
-             unset($product);
              unset($productData);
              unset($variantData);
              unset($snapshotArray);
@@ -311,6 +426,9 @@ class Products extends Component
     public function getPurchasesByOrderDates($startDate=false,$endDate=false)
     {
 
+      $donationDetails = $this->getDonationDetails();
+      $donationPurchasableId =  $donationDetails['donationPurchasableId'];
+      $isDonationAvailable = $donationDetails['isDonationAvailable'];
 
         //print_r($purchasableIds);
 /*
@@ -421,12 +539,12 @@ GROUP BY cv.id
 
             if ($startDate)
             {
-                $query->andWhere("co.dateOrdered >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
+                $query->andWhere("DATE(co.dateOrdered) >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
             }
 
             if ($endDate)
             {
-                $query->andWhere("co.dateOrdered <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
+                $query->andWhere("DATE(co.dateOrdered) <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
             }
             $query->orderBy('co.dateOrdered ASC');
             $purchases = $query->all();

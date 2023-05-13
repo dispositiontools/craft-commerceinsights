@@ -127,12 +127,12 @@ class Transactions extends Component
 
             if( array_key_exists('afterDate' , $options) )
             {
-                $transactionsQuery->andWhere("ct.dateCreated > :afterDate", [ ':afterDate' => $options['afterDate'] ]);
+                $transactionsQuery->andWhere("DATE(ct.dateCreated) >= :afterDate", [ ':afterDate' => $options['afterDate'] ]);
             }
 
             if( array_key_exists('beforeDate' , $options) )
             {
-                $transactionsQuery->andWhere("ct.dateCreated <= :beforeDate", [ ':beforeDate' => $options['beforeDate'] ]);
+                $transactionsQuery->andWhere("DATE(ct.dateCreated) <= :beforeDate", [ ':beforeDate' => $options['beforeDate'] ]);
             }
 
             $transactions = $transactionsQuery->all();
