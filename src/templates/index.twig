@@ -53,6 +53,21 @@
 <br />&nbsp;<br />
     <a href="{{ url('commerceinsights/products') }}" class="ci-button">View purchases by products</a>
     </p>
+
+
+
+    <p>
+      <b>Download core product data</b>
+    </p>
+     <form method="post" >
+        {{ redirectInput(url("commerceinsights") ) }}
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="commerceinsights/reports/download-csv" />
+        <input type="hidden" name="reportType" value="productsDetails" />
+        <input type="submit" class="btn submit" value="Download product details CSV">
+    </form>
+
+
   </div>
 </div>
 {% endif %}

@@ -46,7 +46,7 @@ class ReportsController extends Controller
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected array|int|bool $allowAnonymous = ['index', 'do-something'];
+    protected array|int|bool $allowAnonymous = ['index'];
 
     // Public Methods
     // =========================================================================
@@ -143,6 +143,18 @@ class ReportsController extends Controller
                 $reportDetails  = Commerceinsights::$plugin->products->getBestSellingProducts($startDate,$endDate);
                 $csvData        = $this->makeCsv( $reportDetails['variants'] );
                 $filenameReportType       = "BestSellingVariants";
+
+              break;
+
+          case "productsDetails":
+
+
+                $siteId       = Craft::$app->request->post('siteId');
+                $siteId       = 1;
+                $options=["siteId" => $siteId ];
+                $reportDetails  = Commerceinsights::$plugin->products->getProductsDataForExport($options);
+                $csvData        = $this->makeCsv( $reportDetails );
+                $filenameReportType       = "Products";
 
               break;
 

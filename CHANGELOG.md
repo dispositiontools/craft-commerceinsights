@@ -1,5 +1,16 @@
 # Release Notes for Commerce Insights
 
+## 4.0.3 - 2023-05-13
+
+### Updated
+- Updated reports to correctly include all report items in the date window. Fixing issue [#8](https://github.com/dispositiontools/craft-commerceinsights/issues/8)
+
+### Fixed
+- Fixed the product reports which were showing an error when Donations are in use. Fixing issue [#9](https://github.com/dispositiontools/craft-commerceinsights/issues/9)
+
+### Added
+- Added a report to be able to download core product data as CSV
+
 ## 4.0.2 - 2023-01-12
 
 ### Fixed
