@@ -1,5 +1,12 @@
 # Release Notes for Commerce Insights
 
+## 1.0.12 - 2023-05-13
+
+### Updated
+- The Best Selling Products report caused an error when the order line item snapshot didn't have a product attached. This happens when using a Donation or can also happen when using a custom purchasable. The report now shows a donation as a donation product type. 
+
+### Changed
+- The Best Selling Products report, the Which products when and who by report and the transactions report now correctly show all the records within the date range. Fixing issue [#8](https://github.com/dispositiontools/craft-commerceinsights/issues/8)
 
 ## 1.0.11 - 2022-10-23
 
