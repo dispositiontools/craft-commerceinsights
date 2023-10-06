@@ -1,5 +1,12 @@
 # Release Notes for Commerce Insights
 
+
+## 1.0.14 - 2023-10-06
+
+### Added
+- Added Support for verbb/gift-voucher - with thanks to [pixelmachine](https://github.com/pixelmachine)
+
+
 ## 1.0.13 - 2023-10-06
 
 ### Fixed
