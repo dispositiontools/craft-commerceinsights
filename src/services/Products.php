@@ -704,6 +704,28 @@ class Products extends Component
                         ];
       
              }
+             elseif (  array_key_exists('purchasableId',$snapshotArray ) && 
+                       array_key_exists('type',$snapshotArray ) && 
+                       $snapshotArray['type'] == "verbb\\giftvoucher\\elements\\Voucher" )
+             {
+
+      
+                        $productData = [
+                          'productId'     => $snapshotArray['purchasableId'],
+                          'productTypeName' => 'Voucher',
+                          'productTitle'  => $snapshotArray['title'],
+                        ];
+      
+                        $variantData = [
+                          'productId'     => $snapshotArray['purchasableId'],
+                          'productTypeName' => 'Voucher',
+                          'productTitle'  => $snapshotArray['title'],
+                          'variantId'     => $snapshotArray['purchasableId'],
+                          'variantTitle'  => null,      
+                        ];
+      
+
+             }
              elseif(array_key_exists('product', $snapshotArray)  )
              {
 
