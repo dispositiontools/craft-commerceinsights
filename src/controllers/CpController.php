@@ -254,7 +254,6 @@ class CpController extends Controller
     public function actionProduct($productId)
     {
         $productDetails = Commerceinsights::$plugin->products->getPurchasesByProduct($productId);
-
         return $this->renderTemplate(
           'commerceinsights/_cp/product',
           [
@@ -322,7 +321,8 @@ class CpController extends Controller
           [
               'startDate'      => $startDateObject,
               'endDate'        => $endDateObject,
-              'purchases'      => $productsDetails['purchases'],
+              'productPurchases'      => $productsDetails['productPurchases'],
+              'variantPurchases'      => $productsDetails['variantPurchases'],
               'totals'         => $productsDetails['totals']
           ]
         );

@@ -430,133 +430,336 @@ class Products extends Component
       $donationPurchasableId =  $donationDetails['donationPurchasableId'];
       $isDonationAvailable = $donationDetails['isDonationAvailable'];
 
-        //print_r($purchasableIds);
-/*
-
-SELECT cv.sku,
-cv.id as variantId,
-cp.id as productId,
-cvc.title as variantTitle,
-cpc.title as productTitle
-FROM craft_commerce_variants as cv
-LEFT JOIN craft_commerce_products as cp on cp.id = cv.productId
-LEFT JOIN craft_content as cvc on cvc.elementId = cv.id
-LEFT JOIN craft_content as cpc on cpc.elementId = cp.id
-GROUP BY cv.id
-
-*/
-
-        $productVariantsQuery = (new Query())
-          ->select([
-            'cv.id AS variantDetailsId',
-            'cp.id AS variantProductId',
-            'cvc.title AS variantTitle',
-            'cpc.title AS productTitle',
-            'cpt.id as productTypeId',
-            'cpt.name as productTypeName',
-
-          ])
-          ->from(['cv' => Table::VARIANTS])
-          ->leftJoin(['cp' => Table::PRODUCTS],'cp.id = cv.productId')
-          ->leftJoin(['cpt' => Table::PRODUCTTYPES],'cpt.id = cp.typeId')
-          ->leftJoin(['cvc' => CraftTable::CONTENT],'cvc.elementId = cv.id')
-          ->leftJoin(['cpc' => CraftTable::CONTENT],'cpc.elementId = cp.id')
-          ->groupBy('cv.id');
 
 
-        $query = (new Query())
-            ->select([
-              'p.productTypeId',
-              'p.productTypeName',
-              'p.productTitle',
-              'p.variantTitle',
-              'co.id as orderId',
-              'co.email as orderEmail',
-              'co.orderSiteId as orderSiteId',
-              'co.customerId as customerId',
-              'cc.userId as userId',
-              'cu.email as userEmail',
-              'cu.firstname as userFirstName',
-              'cu.lastName as userLastName',
-              'co.gatewayId as orderGatewayId',
-              'co.number as orderNumber',
-              'co.reference as orderReference',
-              'co.datePaid as orderDatePaid',
-              'co.totalPaid as orderTotalPaid',
-              'co.currency as orderCurrency',
-              'co.paymentCurrency as orderPaymentCurrency',
-              'cos.name as orderStatusName',
-              'cos.handle as orderStatusHandle',
-              'cos.color as orderStatusColor',
-              'clis.name as lineItemStatusName',
-              'clis.handle as lineItemStatusHandle',
-              'clis.color as lineItemStatusColor',
-              'cli.description as lineItemStatusDescription',
-              'cli.options as lineItemOptions',
-              'cli.qty as lineItemQty',
-              'cli.total as lineItemTotal',
-              'cli.subtotal as lineItemSubtotal',
-              'cli.price as lineItemPrice',
-              'cli.salePrice as lineItemSalePrice',
-              'cli.saleAmount as lineItemSaleAmount',
-              'cli.note as lineItemNote',
-              'cs.name as siteName',
-              'cs.handle as siteHandle',
+      $orderQuery = OrderElement::find()->isCompleted(true);
+     
+     if ($startDate)
+     {
+      $orderQuery->andWhere("DATE(dateOrdered) >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
+     }
 
-              'cosa.businessName as shippingBusinessName',
-              'cosa.firstName as shippingFirstName',
-              'cosa.lastName as shippingLastName',
-              'cosa.address1 as shippingAddress1',
-              'cosa.address2 as shippingAddress2',
-              'cosa.address3 as shippingAddress3',
-              'cosa.city as shippingCity',
-              'cosa.zipCode as shippingPostcode',
+     if ($endDate)
+     {
+      $orderQuery->andWhere("DATE(dateOrdered) <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
+     }
+  
+     $orders = $orderQuery->all();
 
-              'coba.businessName as billingBusinessName',
-              'coba.firstName as billingFirstName',
-              'coba.lastName as billingLastName',
-              'coba.address1 as billingAddress1',
-              'coba.address2 as billingAddress2',
-              'coba.address3 as billingAddress3',
-              'coba.city as billingCity',
-              'coba.zipCode as billingPostcode',
+     $products = [];
+
+     $variants = [];
+     $ordersCount = count($orders);
+     $customers = [];
+     $qtyTotal = 0;
+     $totalTotal = 0;
+     $subtotalTotal = 0;
+     $productTypes = [];
+
+     $productPurchases = [];
+     $variantPurchases = [];
+
+     foreach($orders AS $order)
+     {
+         $customerId = $order->customerId;
+         
+         $customer = $order->getCustomer();
+         
+         $userId = $customer->userId;
+         $orderUserDetails = [
+             'userId' => '',	
+             'userEmail' => '',	
+             'userFirstName' => '',	
+             'userLastName' => '',
+         ];
+         if($userId)
+         {
+             $orderUser =  Craft::$app->users->getUserById($userId);
+             if($orderUser)
+             {
+                 $orderUserDetails = [
+                      'userId' => $orderUser->id,
+                      'userEmail' => $orderUser->email,
+                      'userFirstName' => $orderUser->firstName,
+                      'userLastName' => $orderUser->lastName,
+                  ];
+             }
+         }
+         
+         $orderStatus = $order->orderStatus;
+         
+         $orderSite = $order->orderSite;
+        
+         $orderDetails = [
+             'orderEmail' => $order->email,
+             'orderId' => $order->id,
+             'customerId' => $customerId,
+             'orderGatewayId' => $order->gatewayId,
+             'orderReference' => $order->reference,
+             'orderNumber' => $order->number,
+             'orderSiteId' => $order->siteId,
+             'siteName' => $orderSite->name,
+             'siteHandle' => $orderSite->handle,
+             'orderDatePaid' => "",
+             'orderDateOrdered' => $order->dateOrdered->format("Y-m-d H:i:s"),
+             'orderTotalPrice' => $order->totalPrice,
+             'orderTotalPaid' => $order->totalPaid,
+             'orderAmountDue' => $order->totalPrice - $order->totalPaid,
+             'orderCurrency'=> $order->currency,
+             'orderPaymentCurrency' => $order->paymentCurrency,
+             'orderStatusName' => $orderStatus->name,
+             'orderStatusHandle' => $orderStatus->handle,
+             'orderStatusColor' => $orderStatus->color,
+             
+             
+             
+             
+         ];
+         
+         if($order->datePaid)
+         {
+             $orderDetails['orderDatePaid'] =  $order->datePaid->format("Y-m-d H:i:s");
+         }
+         
+         $shippingAddress = $order->shippingAddress;
+         
+         
+       
+         $billingAddress = $order->billingAddress;
+         
+         
+         $addressBillingDetails = [
+            'billingBusinessName' => "",
+            'billingFirstName' => "",
+            'billingLastName' => "",
+            'billingAddress1' => "",
+            'billingAddress2' => "",
+            'billingAddress3' => "",
+            'billingCity' => "",
+            'billingPostcod' => "",
+        ];
+        
+        $addressShippingDetails = [
+            'shippingBusinessName' => "",
+            'shippingFirstName' => "",
+            'shippingLastName' => "",
+            'shippingAddress1' => "",
+            'shippingAddress2' => "",
+            'shippingAddress3' => "",
+            'shippingCity' => "",
+            'shippingPostcode' => "",
+         ];
+         
+         if($billingAddress){
+             $addressBillingDetails = [
+                 'billingBusinessName' => $billingAddress->businessName ,
+                 'billingFirstName' => $billingAddress->firstName ,
+                 'billingLastName' => $billingAddress->lastName ,
+                 'billingAddress1' => $billingAddress->address1 ,
+                 'billingAddress2' => $billingAddress->address2 ,
+                 'billingAddress3' => $billingAddress->address3 ,
+                 'billingCity' => $billingAddress->city ,
+                 'billingPostcode' => $billingAddress->zipCode ,
+             ];
+
+         }
+         
+         if($shippingAddress){
+              $addressShippingDetails = [
+                  'shippingBusinessName' => $billingAddress->businessName ,
+                  'shippingFirstName' => $billingAddress->firstName ,
+                  'shippingLastName' => $billingAddress->lastName ,
+                  'shippingAddress1' => $billingAddress->address1 ,
+                  'shippingAddress2' => $billingAddress->address2 ,
+                  'shippingAddress3' => $billingAddress->address3 ,
+                  'shippingCity' => $billingAddress->city ,
+                  'shippingPostcode' => $billingAddress->zipCode ,
+              ];
+
+          }
+        
+
+           
+         $exportCustomer = array_merge(
+             $addressBillingDetails, $addressShippingDetails
+         );
+         
+         
+
+         if(!array_key_exists($customerId , $customers))
+         {
+           $customers[ $customerId ] = 1;
+         }
+         else
+         {
+           // code...
+           $customers[ $customerId ] = $customers[ $customerId ] + 1;
+         }
+         $lineItems = $order->getLineItems();
+
+         foreach($lineItems as $lineItem)
+         {
+             
+             
+             
+             
+             
+             //$variant = $lineItem->getPurchasable();
+             //$product = $variant->getProduct();
+             $snapshotArray =  $lineItem->snapshot;
+             
+             
+             
+                 
+    
+              
+             $lineItemStatus =  $lineItem->lineItemStatus;
+
+             $lineItemStatusName = "";
+             $lineItemStatusHandle="";
+             $lineItemStatusColor = "";
+             $lineItemStatusId="";
+             
+             if ( $lineItemStatus )
+             {  
+                $lineItemStatusId =  $lineItemStatus->id;
+                 $lineItemStatusName =  $lineItemStatus->name;
+                  $lineItemStatusHandle=$lineItemStatus->handle;
+                  $lineItemStatusColor = $lineItemStatus->color;
+     
+             }
+                    $lineItemDetails = [
+                          'lineItemStatusName' => $lineItemStatusName ,
+                          'lineItemStatusHandle' => $lineItemStatusHandle,
+                          'lineItemStatusColor' => $lineItemStatusColor,
+                          'lineItemStatusId' => $lineItemStatusId,
+                          'lineItemOptions' => json_encode($lineItem->options),
+                          'lineItemQty' => $lineItem->qty,
+                          'lineItemTotal' => $lineItem->total,
+                          'lineItemSubtotal' => $lineItem->subtotal,
+                          'lineItemPrice' => $lineItem->price,
+                          'lineItemSalePrice' => $lineItem->salePrice,
+                          'lineItemSaleAmount' => $lineItem->saleAmount,
+                          'lineItemNote' => $lineItem->note,
+                          'lineItemPrivateNote' => $lineItem->privateNote,
+                      ];
+                     
+                            
+           
+          
+
+             /*
+             
+              If there are donations then there will not be a product array in the snapshot. the snapshot will look more like this:
+              {"price":0,"sku":"DONATION-CC3","description":"Donation","purchasableId":6364,"cpEditUrl":"#","options":{"donationAmount":"20","giftaid":"Yes"},"sales":[]}
+             */
+            if (  array_key_exists('purchasableId',$snapshotArray ) && $snapshotArray['purchasableId'] == $donationPurchasableId )
+            {
+              $productTypes[ $snapshotArray['sku'] ] = "Donation";
+            }
+            elseif ( !array_key_exists('product',$snapshotArray ) )
+            {
+              $productTypes[$snapshotArray['sku']] = $snapshotArray['sku'];
+            }
+            elseif(!array_key_exists($snapshotArray['product']['typeId'], $productTypes))
+             {
+                 $productType = Commerce::getInstance()->ProductTypes->getProductTypeById($snapshotArray['product']['typeId']);
+                 if($productType)
+                 {
+                     $productTypes[ $snapshotArray['product']['typeId'] ] = $productType->name;
+                     unset( $productType );
+                 }
+                 else
+                 {
+                     $productTypes[ $snapshotArray['product']['typeId'] ] = $snapshotArray['product']['typeId'];
+                 }
+             }
+
+
+
+             $qtyTotal   = $qtyTotal + $lineItem->qty;
+             $totalTotal = $totalTotal + $lineItem->total;
+             $subtotalTotal = $subtotalTotal + $lineItem->subtotal;
+
+             // If donation: 
+             if (  array_key_exists('purchasableId',$snapshotArray ) && $snapshotArray['purchasableId'] == $donationPurchasableId )
+             {
+
+                      $productData = [
+
+                        'productId'     => $donationPurchasableId,
+                        'productTypeName' => $productTypes[ $snapshotArray['sku'] ],
+                        'productTitle'  => "Donation",
+                      ];
+
+                  $donationVariantId =  $donationPurchasableId."-".$lineItem->subtotal;
+                  $donationVariantTitle = "Donation - ".$lineItem->subtotal;
+
+                        $variantData = [
+                          'productId'     => $donationPurchasableId,
+                          'productTypeName' => $productTypes[ $snapshotArray['sku'] ],
+                          'productTitle'  => "Donation",
+                          'variantId'     => $donationVariantId,
+                          'variantTitle'  => $donationVariantTitle,      
+                        ];
+      
+             }
+             elseif(array_key_exists('product', $snapshotArray)  )
+             {
+
+      
+                        $productData = [
+                          'productId'     => $snapshotArray['product']['id'],
+                          'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
+                          'productTitle'  => $snapshotArray['product']['title'],
+                        ];
+      
+                        $variantData = [
+                          'productId'     => $snapshotArray['product']['id'],
+                          'productTypeName' => $productTypes[ $snapshotArray['product']['typeId'] ],
+                          'productTitle'  => $snapshotArray['product']['title'],
+                          'variantId'     => $snapshotArray['id'],
+                          'variantTitle'  => $snapshotArray['title'],      
+                        ];
+      
+
+             }
+            $fullProductDetails = array_merge($productData,$orderDetails,$orderUserDetails,$lineItemDetails,$exportCustomer);
+            $fullVariantDetails = array_merge($variantData,$orderDetails,$orderUserDetails,$lineItemDetails,$exportCustomer);
+             unset($productData);
+             unset($variantData);
+             unset($snapshotArray);
+             unset($lineItemDetails);
+             
+             
+             $productPurchases[] = $fullProductDetails;
+             $variantPurchases[] = $fullVariantDetails;
+
+             unset($fullProductDetails);
+              unset($fullVariantDetails);
+         } // end foreach lineitem
+
+     }// end foreach order
+     
+     
+     
+
+   
+        $return =  [
+          'productPurchases' => $productPurchases,
+          'variantPurchases' => $variantPurchases,
+          'totals' => [
+            'customers' => count($customers),
+            'products' => count($products),
+            'variants' => count($variants),
+            'productTypes' => count($productTypes),
+
           ]
-            )
-            ->from(['cli' => Table::LINEITEMS])
-            ->leftJoin(['co' => Table::ORDERS],'co.id = cli.orderId')
-            ->leftJoin(['cc' => Table::CUSTOMERS],'cc.id = co.customerId')
-            ->leftJoin(['cu' => CraftTable::USERS],'cu.id = cc.userId')
-            ->leftJoin(['cs' => CraftTable::SITES],'cs.id = co.orderSiteId')
-            ->leftJoin(['cos' => Table::ORDERSTATUSES],'cos.id = co.orderStatusId')
-            ->leftJoin(['clis' => Table::LINEITEMSTATUSES],'clis.id = cli.lineitemStatusId')
-            ->leftJoin(['cosa' => Table::ADDRESSES],'cosa.id = co.shippingAddressId')
-            ->leftJoin(['coba' => Table::ADDRESSES],'coba.id = co.billingAddressId')
-            ->leftJoin(['p' => $productVariantsQuery ], 'p.variantDetailsId = cli.purchasableId')
-            ->where('co.isCompleted = 1');
-            /*
-                    AND co.datePaid > '2020-12-01'  and co.datePaid < '2021-01-01'
-            */
-
-            if ($startDate)
-            {
-                $query->andWhere("DATE(co.dateOrdered) >= :dateOrderedStart", [ ':dateOrderedStart' => $startDate ]);
-            }
-
-            if ($endDate)
-            {
-                $query->andWhere("DATE(co.dateOrdered) <= :dateOrderedEnd", [ ':dateOrderedEnd' => $endDate ]);
-            }
-            $query->orderBy('co.dateOrdered ASC');
-            $purchases = $query->all();
-
-            //print_r($purchases);
-
-        return [
-          'purchases' => $purchases,
-          'totals' => []
           //'totals' => $purchasesTotals
 
         ];
+
+        return $return;
 
 
         //print_r($query);
@@ -669,49 +872,25 @@ GROUP BY cv.id
             ->andWhere(['in','cli.purchasableId', $purchasableIds]);
 
             $purchases = $query->all();
+            
+            
+            $totals = [
+                'qty' => 0,
+                'total' => 0,
+            ];
+            foreach($purchases as $purchase)
+            {
+                $totals['qty'] +=  $purchase['lineItemQty'];
+                $totals['total'] += $purchase['lineItemTotal'];
+            }
 
-
-/*
-            $purchasesTotals = (new Query())
-                ->select([
-                  'clis.name',
-                  'clis.handle',
-                  'cli.qty',
-                  'cli.total',
-                  'cli.price',
-                  'cli.salePrice',
-                  'cli.saleAmount'
-                  ]
-                )
-                ->from(['cli' => Table::LINEITEMS])
-                ->leftJoin(['co' => Table::ORDERS],'co.id = cli.orderId')
-                ->where('co.isCompleted = 1')
-                ->andWhere(['in','cli.purchasableId', $purchasableIds])->sum(['cli.qty',
-                'cli.total',
-                'cli.price',
-                'cli.salePrice',
-                'cli.saleAmount']);
-                */
-    /*
-            AND co.datePaid > '2020-12-01'  and co.datePaid < '2021-01-01'
-
-
-    */
         return [
           'purchases' => $purchases,
-          'totals' => []
+          'totals' => $totals
           //'totals' => $purchasesTotals
 
         ];
 
-          print_r($purchasesTotals);
-        //print_r($query);
-        $totals = ['qty','saleAmount'];
-        $array = array();
-        foreach ($query as $row)
-        {
-
-        }
 
 
 

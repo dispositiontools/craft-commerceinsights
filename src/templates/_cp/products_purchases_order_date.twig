@@ -13,6 +13,7 @@
  */
 #}
 {% requirePermission 'commerceinsightsProducts' %}
+{% set selectedSubnavItem = 'products' %}
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 {% set fullPageForm = false %}
@@ -78,7 +79,6 @@ Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-
 
 
 
-
 <div class="elements">
 <div class="tableview tablepane">
   <table class="data fullwidth ">
@@ -111,7 +111,7 @@ Products purchased between {{ startDate|date("Y-m-d") }} and {{ endDate|date("Y-
     </thead>
     <tbody>
 
-      {% for purchase in purchases %}
+      {% for purchase in variantPurchases %}
       <tr>
         <td style="white-space: nowrap;">{{ purchase.orderDatePaid }}</td>
         <td>{{ purchase.productTypeName }}</td>

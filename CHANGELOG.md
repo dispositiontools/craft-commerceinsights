@@ -1,5 +1,15 @@
 # Release Notes for Commerce Insights
 
+## 1.0.13 - 2023-10-06
+
+### Fixed
+- Fixed an issue with the products purchased between dates report on MySQL when set to ONLY_FULL_GROUP_MODE. Fixing issue [#10](https://github.com/dispositiontools/craft-commerceinsights/issues/10)
+
+### Added
+- Added Qty and Total totals to the purchasers table
+- Added Nav highlighting 
+
+
 ## 1.0.12 - 2023-05-13
 
 ### Updated

@@ -102,7 +102,7 @@ class ReportsController extends Controller
 
           case "productsPurchasesByOrderDates":
               $reportDetails  = Commerceinsights::$plugin->products->getPurchasesByOrderDates($startDate,$endDate);
-              $csvData        = $this->makeCsv( $reportDetails['purchases'] );
+              $csvData        = $this->makeCsv( $reportDetails['variantPurchases'] );
               $filenameReportType       = "ProductPurchasesByOrderDates";
               break;
           case "customer-summary":
