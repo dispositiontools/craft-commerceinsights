@@ -566,14 +566,14 @@ class Products extends Component
          
          if($shippingAddress){
               $addressShippingDetails = [
-                  'shippingBusinessName' => $billingAddress->businessName ,
-                  'shippingFirstName' => $billingAddress->firstName ,
-                  'shippingLastName' => $billingAddress->lastName ,
-                  'shippingAddress1' => $billingAddress->address1 ,
-                  'shippingAddress2' => $billingAddress->address2 ,
-                  'shippingAddress3' => $billingAddress->address3 ,
-                  'shippingCity' => $billingAddress->city ,
-                  'shippingPostcode' => $billingAddress->zipCode ,
+                  'shippingBusinessName' => $shippingAddress->businessName ,
+                  'shippingFirstName' => $shippingAddress->firstName ,
+                  'shippingLastName' => $shippingAddress->lastName ,
+                  'shippingAddress1' => $shippingAddress->address1 ,
+                  'shippingAddress2' => $shippingAddress->address2 ,
+                  'shippingAddress3' => $shippingAddress->address3 ,
+                  'shippingCity' => $shippingAddress->city ,
+                  'shippingPostcode' => $shippingAddress->zipCode ,
               ];
 
           }

@@ -1,5 +1,9 @@
-# Release Notes for Commerce Insights
+# Release Notes for Commerce Insights (Craft CMS V3)
 
+## 1.0.15 - 2024-01-14
+
+### Updated
+- Fixing an issue when an order has no billing address - with thanks to [pixelmachine](https://github.com/pixelmachine) fixing issue [#12](https://github.com/dispositiontools/craft-commerceinsights/issues/12)
 
 ## 1.0.14 - 2023-10-06
 
